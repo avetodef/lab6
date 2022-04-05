@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="commands.RemoveFirstTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2022-04-03T15:40:29" hostname="LAPTOP-R36H9DT8" time="0.032">
-  <properties/>
-  <testcase name="execute()" classname="commands.RemoveFirstTest" time="0.032"/>
-  <system-out><![CDATA[РєРѕР»Р»РµРєС†РёСЏ РїСѓСЃС‚Р°СЏ. РЅРµС‡РµРіРѕ СѓРґР°Р»СЏС‚СЊ
-]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
