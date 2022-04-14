@@ -1,8 +1,8 @@
 package commands;
 
-import dao.RouteDAO;
+import common.dao.RouteDAO;
 import org.junit.jupiter.api.Assertions;
-import utils.Route;
+import common.utils.Route;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
