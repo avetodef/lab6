@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.commons:commons-csv:1.9.0'
+    //implementation group: 'com.fasterxml.jackson', name: 'jackson-databind', version: '2.0.1'
+    //implementation group: 'com.fasterxml.jackson.databind', name: 'jackson-databind', version: '2.0.1'
+    //implementation group: 'com.fasterxml.jackson.dataformat.csv', name: 'jackson-databind', version: '2.0.1'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    implementation 'ch.qos.logback:logback-classic:1.2.3'
+    implementation 'ch.qos.logback.contrib:logback-json-classic:0.1.5'
+    implementation 'ch.qos.logback.contrib:logback-jackson:0.1.5'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
+    implementation 'org.codehaus.janino:janino:3.0.8'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceCompatibility = JavaVersion.VERSION_16
+targetCompatibility = JavaVersion.VERSION_16

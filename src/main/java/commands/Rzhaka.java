@@ -26,7 +26,6 @@ public class Rzhaka extends ACommands{
 
                 jFrame.setSize(700, 700);
                 JLabel jLabel = new JLabel();
-                //jLabel.setText("ВНИМАНИЕ!! ОТБОЙ ПОЖАРНОЙ ТРЕВОГИ ");
                 jLabel.setIcon(imageIcon);
                 jFrame.add(jLabel);
                 jFrame.setVisible(true);
@@ -42,7 +41,7 @@ public class Rzhaka extends ACommands{
             /*while (true) {
                 if (Objects.equals(sc.nextLine(), "cringe")) {
                     try {
-                        File file = new File("C:\\Users\\Софья\\OneDrive\\Изображения\\a.jpg");
+
                         BufferedImage bufferedImage = ImageIO.read(file);
                         ImageIcon imageIcon = new ImageIcon(bufferedImage);
                         JFrame jFrame = new JFrame();
