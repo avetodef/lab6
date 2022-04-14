@@ -13,6 +13,7 @@ import server.file.FileManager;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -25,7 +26,7 @@ public class ClientApp {
 
     //TODO обработать пицот миллионов поломок джокера по типу поменял порт, подключил два клиента, еще что-нибудь
     //TODO и мне кажется что это все какой то бред и вообще не то что нужно
-    //TODO сделать чтобы передавались не строки а объекты класса реквест (сообщение егошина момент)
+    //TODO сделать чтобы передавались не строки а объекты класса реквест и респонз (сообщение егошина момент)
     //TODO обработать временную недоступность сервера
 
     static String address = "localhost";
@@ -75,13 +76,18 @@ public class ClientApp {
                     throw new ExitException("пока............");}
             }
         }
+        catch (UnknownHostException e){
+            System.out.println("неизвестный хост!");
+            System.exit(0); //TODO тут тоже падает. ну короче везде тут он падает и умирает
+        }
         catch(IllegalArgumentException e){
             System.out.println("имена портов клиента и сервера не совпадают: " + e.getMessage());
         }
         catch (NoSuchElementException e) {
             throw new ExitException("пока-пока");}
-        catch (IOException e){
-            System.out.println("ошибка на уровне mainClientLoop: " + e.getMessage());
+        catch (IOException e){ //TODO тут он тоже головой падает и выводит бесконечный поток исключений ))
+            //System.out.println("ошибка на уровне mainClientLoop: " + e.getMessage());
+        e.printStackTrace();
             System.exit(0);
 
         }

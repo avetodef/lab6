@@ -70,15 +70,17 @@ public class ServerApp {
                 } catch (IndexOutOfBoundsException e) {
                     outputer.printRed("брат забыл айди ввести походу");
                 } catch (BindException e) {
-                    System.out.println(" ");
+                    System.out.println(e.getLocalizedMessage());
                     //TODO выкидывает бесконечный поток исключений если соединение преравно :)))
                 } catch (SocketException e) {
-                    outputer.printRed("соединение с клиентом прервано " + e.getMessage());
+                    outputer.printRed("соединение с клиентом прервано " + e.getLocalizedMessage());
+                    break;
                 }
             }
         }
         catch(IllegalArgumentException e){
             System.out.println("имена портов клиента и сервера не совпадают: " + e.getMessage());
+
         }
         catch(Exception x) {
             System.out.println("ошибка ServerApp: ") ;
