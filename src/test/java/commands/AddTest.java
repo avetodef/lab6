@@ -1,16 +1,12 @@
 package commands;
 
-import dao.RouteDAO;
-import org.junit.jupiter.api.Assertions;
+import common.dao.RouteDAO;
 import org.junit.jupiter.api.Test;
-import utils.Route;
-import utils.RouteInfo;
+import common.utils.Route;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayDeque;
 import java.util.Deque;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class AddTest {
 
