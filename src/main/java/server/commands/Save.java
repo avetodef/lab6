@@ -8,14 +8,15 @@ import java.io.IOException;
 /**
  * Класс команды SAVE, предназначенный для сохранения элементов в коллекцию
  */
-public class Save extends ACommands{
-    FileManager writer = new FileManager();
-    public String execute(RouteDAO routeDAO) {
+public class Save {
+
+    public static String execute(RouteDAO routeDAO) {
+        FileManager writer = new FileManager();
             try {
                 writer.save(routeDAO);
                 return "ура сохранилось";
             } catch (RuntimeException | IOException e) {
-                return ("не удалось сохранить коллекцию " + e.getMessage() + System.lineSeparator());
+                return ("не удалось сохранить коллекцию " + e.getMessage() );
             }
         }
     }

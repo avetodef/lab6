@@ -1,9 +1,10 @@
 package server;
 
 import common.dao.RouteDAO;
+import common.interaction.Response;
 import server.commands.ACommands;
 
-public class ServerResponse {
+public class ServerResponse extends Response {
 
     protected String gotACommand(String command){
         String output = " ";
@@ -16,4 +17,10 @@ public class ServerResponse {
         output = commands.execute(dao);
         return output;
     }
+    String msg;
+//TODO я не знаю как писать эту парашу если честно
+    public ServerResponse(String msg) {
+        this.msg = msg;
+    }
+
 }

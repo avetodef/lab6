@@ -14,6 +14,7 @@ public class RemoveById extends ACommands {
             return ("коллекция пустая. нечего удалять");
         } else {
             try {
+                //TODO переделать часть где берут аргументы :)))))))) то же самле с апдейт бай айди
                 int id = Integer.parseInt(args.get(0));
                 if (!routeDAO.removeById(id)) {
                     return ("нет элемента с таким id. введите команду заново с правильным id");

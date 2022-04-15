@@ -14,7 +14,7 @@ public class JsonConverter {
         } catch (JsonProcessingException e) {
             System.out.println("беды с сериализацией: " + e.getMessage() + " " + e.getCause());
         }
-        return serialized;
+        return serialized + "\0";
     }
 
     public static List<String> deserialize(String s){

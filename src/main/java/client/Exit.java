@@ -10,13 +10,13 @@ import java.util.NoSuchElementException;
 /**
  * Класс команды EXIT, предназначенный для выхода из выполнения программы
  */
-public class Exit extends ACommands {
+public class Exit  {
 
-    public String execute(RouteDAO routeDAO) {
-        Save save = new Save();
+    public static String execute(RouteDAO routeDAO) {
+
         //System.out.println("пока.");
             try {
-                save.execute(routeDAO);
+                //Save.execute(routeDAO);
                 System.exit(0);
                 return ("завершение работы клиента...");
 

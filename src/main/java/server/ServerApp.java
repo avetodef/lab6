@@ -8,61 +8,72 @@ import common.json.JsonConverter;
 import common.utils.IdGenerator;
 import server.commands.ACommands;
 import server.commands.CommandSaver;
+import server.commands.Save;
 import server.file.FileManager;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class ServerApp {
 
-    static FileManager manager = new FileManager();
-    static RouteDAO dao = manager.read();
-    static ConsoleOutputer outputer = new ConsoleOutputer();
+    FileManager manager = new FileManager();
+    RouteDAO dao = manager.read();
+    ConsoleOutputer outputer = new ConsoleOutputer();
 
-    protected static void mainServerLoop(){
+    protected void mainServerLoop() throws IOException {
 
         IdGenerator.reloadId(dao);
         ACommands command;
-        ServerResponse serverResponse = new ServerResponse();
+        ServerResponse serverResponse = new ServerResponse("я русский");
         try {
             int port = 6666;
             outputer.printPurple("Ожидаю подключение клиента");
             ServerSocket ss = new ServerSocket(port);
-            Socket socket = ss.accept();
+
             // TODO сделать чтобы сервер ждал пока клиент не подключится даже если клиент упадет
-
+            Socket socket = ss.accept();
             outputer.printPurple("Клиент подключился");
+            // Берем входной и выходной потоки сокета, теперь можем получать и отсылать данные клиенту.
+            InputStream socketInputStream = socket.getInputStream();
+            OutputStream socketOutputStream = socket.getOutputStream();
+
+            // Конвертируем потоки в другой тип, чтоб легче обрабатывать текстовые сообщения.
+            DataInputStream in = new DataInputStream(socketInputStream);
+            DataOutputStream out = new DataOutputStream(socketOutputStream);
             while (true) {
-
-                // Берем входной и выходной потоки сокета, теперь можем получать и отсылать данные клиенту.
-                InputStream socketInputStream = socket.getInputStream();
-                OutputStream socketOutputStream = socket.getOutputStream();
-
-                // Конвертируем потоки в другой тип, чтоб легче обрабатывать текстовые сообщения.
-                DataInputStream in = new DataInputStream(socketInputStream);
-                DataOutputStream out = new DataOutputStream(socketOutputStream);
                 try {
 
                     String commandFromClient;
-                    commandFromClient = in.readUTF();
+                    StringBuilder builder = new StringBuilder();
+                    int byteRead;
+                    while((byteRead = socketInputStream.read())!=-1) {
+                        if(byteRead == 0)
+                            break;
+                        builder.append((char) byteRead);
+                    }
+                    System.out.println("end");
+                    System.out.println(builder);
 
-                    out.writeUTF(serverResponse.gotACommand(commandFromClient));
+                    commandFromClient = in.readUTF(); //todo застревает на этой строке. почему.
+                    //как будто он нихуя не прочитал
+
+                    System.out.println(commandFromClient);
+                    //out.writeUTF(serverResponse.gotACommand(commandFromClient));
                     command = CommandSaver.getCommand((Objects.requireNonNull(JsonConverter.deserialize(commandFromClient))));
-                    command.execute(dao);
+                    System.out.println("леня жирный уебан");
+                    //command.execute(dao);
 
                     out.writeUTF(serverResponse.commandResponse(command, dao));
+                    Save.execute(dao);
+                    System.out.println("dnwqnfhwpo");
 
                 } catch (NullPointerException e) {
                     System.out.println("Введённой вами команды не существует. Попробуйте ввести другую команду." + e.getLocalizedMessage()
-                    + e.getCause());
+                            + e.getCause());
                 } catch (NoSuchElementException e) {
                     throw new ExitException("пока............");
                 } catch (EmptyInputException e) {
@@ -71,21 +82,22 @@ public class ServerApp {
                     outputer.printRed("брат забыл айди ввести походу");
                 } catch (BindException e) {
                     System.out.println(e.getLocalizedMessage());
-                    //TODO выкидывает бесконечный поток исключений если соединение преравно :)))
-                } catch (SocketException e) {
-                    outputer.printRed("соединение с клиентом прервано " + e.getLocalizedMessage());
-                    break;
                 }
+                //TODO выкидывает бесконечный поток исключений если соединение преравно :)))
+                catch (IOException exception) {
+                    System.err.println("Клиент пока недоступен...такое случается.");
+                    //жди......
+
+                }
+
             }
+        } catch (IllegalArgumentException e) {
+            System.err.println("номера портов клиента и сервера не совпадают: " + e.getMessage());
         }
-        catch(IllegalArgumentException e){
-            System.out.println("имена портов клиента и сервера не совпадают: " + e.getMessage());
-
-        }
-        catch(Exception x) {
-            System.out.println("ошибка ServerApp: ") ;
-        x.printStackTrace();}
     }
-
-
+    //TODO этот чекер не работает...... вместе с ним ломается и клиент и сервер и вообще все падает
+    private boolean checkConnection(Socket socket){
+        //TODO надо как-то написать проверятель есть ли подсоединение или нет....
+        //па ра ша
+    }
 }

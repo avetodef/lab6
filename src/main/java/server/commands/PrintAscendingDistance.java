@@ -1,10 +1,12 @@
 package server.commands;
 
+
 import common.dao.RouteDAO;
 import common.utils.Route;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -12,26 +14,18 @@ import java.util.List;
  */
 public class PrintAscendingDistance extends ACommands{
 
-    List<Integer> distanceList = new ArrayList<>();
 
     public String execute(RouteDAO routeDAO) {
 
-        for (Route route : routeDAO.getAll()) {
-            distanceList.add(route.getDistance());
-        }
+        StringBuilder builder = new StringBuilder();
+        routeDAO.getAll().stream()
+                .sorted((r1, r2) -> r2.getDistance() - r1.getDistance())
+                .forEach(r->builder.append(r.getDistance()).append(" "));
 
-        if (routeDAO.getAll().size() == 0) {
-            return ("коллекция пустая. нечего выводить");
 
-        } else {
-
-            Collections.sort(distanceList);
-            String output = distanceList.toString();
-            distanceList.clear();
-            return "значения поля distance всех элементов в порядке возрастания: " + output;
-        }
-
+        if (routeDAO.getAll().size() == 0)
+            return "коллекция пустая. нечего выводить";
+        else
+            return "значения поля distance всех элементов в порядке возрастания: " + builder;
     }
-
-
 }

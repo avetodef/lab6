@@ -17,10 +17,7 @@ public class PrintUniqueDistance extends ACommands{
         if (routeDAO.getAll().size() == 0) {
             return ("коллекция пустая. нечего выводить");
         } else {
-            for (Route route1 : routeDAO.getAll()) {
-                distanceSet.add(route1.getDistance());
-            }
-
+            routeDAO.getAll().stream().forEach(r -> distanceSet.add(r.getDistance()));
             //System.out.println("уникальные значения поля distance: " + distanceSet.toString());
             return "уникальные значения поля distance: " + distanceSet.toString();
         }

@@ -127,4 +127,9 @@ public class RouteDAO implements DAO {
         this.collection = collection;
     }
     public RouteDAO(){}
+
+    public boolean exit;
+    public void trueExit(){
+        exit = true;
+    }
 }

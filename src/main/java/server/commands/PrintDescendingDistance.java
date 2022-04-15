@@ -5,6 +5,7 @@ import common.utils.Route;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -12,24 +13,19 @@ import java.util.List;
  */
 public class PrintDescendingDistance extends ACommands {
 
-    static List<Integer> distanceList = new ArrayList<>();
 
     public String execute(RouteDAO routeDAO) {
 
-        for (Route route : routeDAO.getAll()) {
-            distanceList.add(route.getDistance());
-        }
-        if (routeDAO.getAll().size() == 0) {
-            return ("коллекция пустая. нечего выводить");
-        } else {
+        StringBuilder builder = new StringBuilder();
+        routeDAO.getAll().stream()
+                .sorted(Comparator.comparingInt(Route::getDistance))
+                .forEach(r->builder.append(r.getDistance()).append(" "));
 
-            Collections.sort(distanceList);
-            Collections.reverse(distanceList);
-            String output = distanceList.toString();
-            distanceList.clear();
-            return "значения поля distance всех элементов в порядке убывания: " + output;
 
-        }
+        if (routeDAO.getAll().size() == 0)
+            return "коллекция пустая. нечего выводить";
+        else
+            return "значения поля distance всех элементов в порядке возрастания: " + builder;
     }
 
 }
