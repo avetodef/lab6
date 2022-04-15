@@ -14,11 +14,13 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class ClientApp {
 
@@ -27,6 +29,7 @@ public class ClientApp {
      ConsoleReader consoleReader = new ConsoleReader();
      ConsoleOutputer outputer = new ConsoleOutputer();
      Scanner fromKeyboard = new Scanner(System.in);
+    ByteBuffer buffer = ByteBuffer.allocate(2048);
     //TODO обработать пицот миллионов поломок джокера по типу поменял порт, подключил два клиента, еще что-нибудь
     //TODO сделать чтобы передавались не строки а объекты класса реквест и респонз (сообщение егошина момент)
     int serverPort = 6666;
@@ -35,7 +38,7 @@ public class ClientApp {
         IdGenerator.reloadId(dao);
         List<String> input;
         String serverResponse;
-        ByteBuffer buffer;
+
 
     try {//todo как заставить байт буфер и потоки дружить....
 
@@ -47,11 +50,11 @@ public class ClientApp {
 
         socketChannel.connect(new InetSocketAddress("localhost", serverPort));
 
-
+        System.out.println(socketChannel.isConnected());
 
         while (true) {
             try {
-                System.out.println(socketChannel.isConnected());//false
+
                 input = consoleReader.reader();
 
                 List<String> toCheck = input;
@@ -63,23 +66,41 @@ public class ClientApp {
                     //System.out.println(buffer);
                     //System.out.println(socketChannel.write(buffer));
                     socketChannel.write(buffer);
+                    System.out.println("capacity:" +  buffer.capacity());
+                    System.out.println("limit: " + buffer.limit());
+
                     System.out.println("команда отправляется на сервер...");
                 }
                 else
                     throw new NullPointerException("Введённой вами команды не существует. Попробуйте ввести другую команду.");
 
-                //serverResponse = in.readUTF();
-//                buffer.clear();
-//                socketChannel.read(buffer);
-//                serverResponse = StandardCharsets.UTF_8.decode(buffer).toString();
-//                outputer.printWhite("сообщение от сервера: "+serverResponse);
-
+                //todo передает все по 9 символов... а иногда не по 9 а по рандому. может выкинуть 27 симолов а может 3 символа
+                //todo мне кажется что он выводит только символов какой у него лимит... а как сделать лимит больше я не знаю
                 buffer.clear();
-                int bRead = socketChannel.read(buffer);
-                System.out.println(bRead);
-                serverResponse = StandardCharsets.UTF_8.decode(buffer).toString(); //ну конечно же)
 
-                System.out.println(serverResponse); //печатает что сервер респонз пустой...
+                //TimeUnit.MINUTES.sleep(1);
+
+                socketChannel.read(buffer);
+                buffer.flip();
+                //buffer.limit(100);
+//TODO рассказываю будующей себе. короче он считает за лимит и капасити то сколько букв в твоей команде. и еще он если не успевает вывести
+                // предыдущий резльтат выполнения команды то он продолжает его выводить
+// tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
+
+                System.out.println("capacity:" +  buffer.capacity());
+                System.out.println("limit: " + buffer.limit());
+                System.out.println(buffer.toString());
+                serverResponse = StandardCharsets.UTF_8.decode(buffer).toString();
+                outputer.printWhite("сообщение от сервера: "+serverResponse);
+
+
+//                buffer.clear(); //ничего не записывается в буфер
+//                int bRead = socketChannel.read(buffer);
+//                System.out.println(bRead);
+//                serverResponse = StandardCharsets.UTF_8.decode(buffer).toString(); //ну конечно же)
+
+                //System.out.println(serverResponse); //печатает что сервер респонз пустой...
+
 
             }
             catch (NullPointerException e) {
@@ -94,6 +115,7 @@ public class ClientApp {
             catch (NoSuchElementException e) {
                 throw new ExitException("пока-пока");
             }
+
         }
     }
     catch (UnknownHostException e) {
@@ -137,14 +159,41 @@ public class ClientApp {
     }
 
     protected void greetings() {
-        outputer.printCyan("\t\t\t\t\t▒██░░░─░▄█▀▄─░▐█▀▄──░▄█▀▄─     ▒█▀▀ \n\t\t\t\t\t▒██░░░░▐█▄▄▐█░▐█▀▀▄░▐█▄▄▐█     ▒▀▀▄ \n\t\t\t\t\t▒██▄▄█░▐█─░▐█░▐█▄▄▀░▐█─░▐█     ▒▄▄▀ ");
-        outputer.printCyan("\t\t\t\t\t\tNika and Sofia production\n");
+        //outputer.printCyan("\t\t\t\t\t▒██░░░─░▄█▀▄─░▐█▀▄──░▄█▀▄─     ▒█▀▀ \n\t\t\t\t\t▒██░░░░▐█▄▄▐█░▐█▀▀▄░▐█▄▄▐█     ▒▀▀▄ \n\t\t\t\t\t▒██▄▄█░▐█─░▐█░▐█▄▄▀░▐█─░▐█     ▒▄▄▀ ");
+        outputer.printCyan("__________                                 \n" +
+                "         .'----------`.                              \n" +
+                "         | .--------. |                             \n" +
+                "         | | LABA 6 | |       ___________              \n" +
+                "         | |########| |      /___________\\             \n" +
+                ".--------| `--------' |------|    --=--  |-------------.\n" +
+                "|        `----,-.-----'      |SUIR MOMENT|             | \n" +
+                "|       ______|_|_______     |___________|             | \n" +
+                "|      /  NIKA AND SOFIA \\                             | \n" +
+                "|     /    PRODUCTION     \\                            | \n" +
+                "|     ^^^^^^^^^^^^^^^^^^^^                            | \n" +
+                "+-----------------------------------------------------+\n" +
+                "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ");
+
+        //outputer.printCyan("\t\t\t\t\t\tNika and Sofia production\n");
         System.out.println("Для того чтобы начать введите команду. Чтобы увидеть список доступных команд введите help");
     }
 
     private  void ifExit(List<String> command, RouteDAO dao){
 
         if (command.contains("exit")){
+            outputer.printPurple("  _______________                        |*\\_/*|________\n" +
+                    "  |  ___________  |     .-.     .-.      ||_/-\\_|______  |\n" +
+                    "  | |           | |    .****. .****.     | |           | |\n" +
+                    "  | |   0   0   | |    .*****.*****.     | |   0   0   | |\n" +
+                    "  | |     -     | |     .*********.      | |     -     | |\n" +
+                    "  | |   \\___/   | |      .*******.       | |   \\___/   | |\n" +
+                    "  | |___CLIENT___| |       .*****.        | |___SERVER_| |\n" +
+                    "  |_____|\\_/|_____|        .***.         |_______________|\n" +
+                    "    _|__|/ \\|_|_.............*.............._|________|_\n" +
+                    "   / ********** \\          ПОКА             / ********** \\\n" +
+                    " /  ************  \\                      /  ************  \\\n" +
+                    "--------------------                    --------------------");
+
             Exit.execute(dao);
         }
     }

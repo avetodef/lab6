@@ -13,14 +13,10 @@ public class ServerResponse extends Response {
     }
 
     protected String commandResponse(ACommands commands, RouteDAO dao){
-        String output = " ";
+        String output = "";
         output = commands.execute(dao);
         return output;
     }
-    String msg;
-//TODO я не знаю как писать эту парашу если честно
-    public ServerResponse(String msg) {
-        this.msg = msg;
-    }
+
 
 }

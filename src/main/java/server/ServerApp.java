@@ -10,7 +10,6 @@ import server.commands.ACommands;
 import server.commands.CommandSaver;
 import server.commands.Save;
 import server.file.FileManager;
-
 import java.io.*;
 import java.net.BindException;
 import java.net.ServerSocket;
@@ -28,7 +27,7 @@ public class ServerApp {
 
         IdGenerator.reloadId(dao);
         ACommands command;
-        ServerResponse serverResponse = new ServerResponse("я русский");
+        ServerResponse serverResponse = new ServerResponse();
 
         try {
             int port = 6666;
@@ -46,10 +45,7 @@ public class ServerApp {
             InputStream socketInputStream = socket.getInputStream();
             OutputStream socketOutputStream = socket.getOutputStream();
 
-            // Конвертируем потоки в другой тип, чтоб легче обрабатывать текстовые сообщения.
-            DataInputStream in = new DataInputStream(socketInputStream);
-            DataOutputStream out = new DataOutputStream(socketOutputStream);
-
+            DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
 //            Selector selector = Selector.open();
 //            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 //            InetSocketAddress hostAddress = new InetSocketAddress("localhost", port);
@@ -66,21 +62,19 @@ public class ServerApp {
                             break;
                         builder.append((char) byteRead);
                     }
-
-                    System.out.println("end");
                     System.out.println(builder);
 
-                    //commandFromClient = in.readUTF(); //todo застревает на этой строке. почему.
                     commandFromClient = builder.toString();
 
-                    //System.out.println(commandFromClient);
-                    //out.writeUTF(serverResponse.gotACommand(commandFromClient));
                     command = CommandSaver.getCommand((Objects.requireNonNull(JsonConverter.deserialize(commandFromClient))));
 
                     command.execute(dao);
 
-                    //out.writeUTF(serverResponse.commandResponse(command, dao));
-                    socketOutputStream.write(Integer.parseInt(serverResponse.commandResponse(command, dao)));
+                    //socketOutputStream.write(Integer.parseInt(serverResponse.commandResponse(command, dao))); не работает...
+//                    OutputStreamWriter osw = new OutputStreamWriter(socketOutputStream, StandardCharsets.UTF_8);
+//                    osw.write(serverResponse.commandResponse(command, dao));
+                    dataOutputStream.writeUTF(serverResponse.commandResponse(command, dao));
+//                    dataOutputStream.wait();
                     Save.execute(dao);
 
                 } catch (NullPointerException e) {
@@ -99,13 +93,17 @@ public class ServerApp {
                 catch (IOException exception) {
                     System.err.println("Клиент пока недоступен...такое случается.");
                     //жди......
+                    break;
 
 
                 }
+//                catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
 
             }
         } catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
         }
     }
     //TODO этот чекер не работает...... вместе с ним ломается и клиент и сервер и вообще все падает

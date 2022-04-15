@@ -27,6 +27,7 @@ public class CommandSaver {
         commandsMap.put("print_ascending_distance", new PrintAscendingDistance());
         commandsMap.put("print_descending_distance", new PrintDescendingDistance());
         commandsMap.put("rzhaka", new Rzhaka());
+        commandsMap.put("tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt", new Test());
 
     }
 
