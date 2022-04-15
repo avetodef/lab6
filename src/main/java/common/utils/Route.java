@@ -68,5 +68,25 @@ public class Route {
         to = new common.utils.loc.Location(routeInfo.toX, routeInfo.toY, routeInfo.nameTo);
         distance = routeInfo.distance;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public Coordinates getCoordinates() {
+        return coordinates;
+    }
+
+    public ZonedDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public Location getFrom() {
+        return from;
+    }
+
+    public common.utils.loc.Location getTo() {
+        return to;
+    }
 }
 

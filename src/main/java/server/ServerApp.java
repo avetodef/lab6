@@ -29,14 +29,19 @@ public class ServerApp {
         IdGenerator.reloadId(dao);
         ACommands command;
         ServerResponse serverResponse = new ServerResponse("я русский");
+
         try {
             int port = 6666;
             outputer.printPurple("Ожидаю подключение клиента");
-            ServerSocket ss = new ServerSocket(port);
+            ServerSocket serverSocket = new ServerSocket(port);
 
             // TODO сделать чтобы сервер ждал пока клиент не подключится даже если клиент упадет
-            Socket socket = ss.accept();
+
+            Socket socket = serverSocket.accept();
+
+            System.out.println(socket.isConnected()); //true
             outputer.printPurple("Клиент подключился");
+
             // Берем входной и выходной потоки сокета, теперь можем получать и отсылать данные клиенту.
             InputStream socketInputStream = socket.getInputStream();
             OutputStream socketOutputStream = socket.getOutputStream();
@@ -44,6 +49,12 @@ public class ServerApp {
             // Конвертируем потоки в другой тип, чтоб легче обрабатывать текстовые сообщения.
             DataInputStream in = new DataInputStream(socketInputStream);
             DataOutputStream out = new DataOutputStream(socketOutputStream);
+
+//            Selector selector = Selector.open();
+//            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+//            InetSocketAddress hostAddress = new InetSocketAddress("localhost", port);
+//            serverSocketChannel.bind(hostAddress);
+
             while (true) {
                 try {
 
@@ -55,21 +66,22 @@ public class ServerApp {
                             break;
                         builder.append((char) byteRead);
                     }
+
                     System.out.println("end");
                     System.out.println(builder);
 
-                    commandFromClient = in.readUTF(); //todo застревает на этой строке. почему.
-                    //как будто он нихуя не прочитал
+                    //commandFromClient = in.readUTF(); //todo застревает на этой строке. почему.
+                    commandFromClient = builder.toString();
 
-                    System.out.println(commandFromClient);
+                    //System.out.println(commandFromClient);
                     //out.writeUTF(serverResponse.gotACommand(commandFromClient));
                     command = CommandSaver.getCommand((Objects.requireNonNull(JsonConverter.deserialize(commandFromClient))));
-                    System.out.println("леня жирный уебан");
-                    //command.execute(dao);
 
-                    out.writeUTF(serverResponse.commandResponse(command, dao));
+                    command.execute(dao);
+
+                    //out.writeUTF(serverResponse.commandResponse(command, dao));
+                    socketOutputStream.write(Integer.parseInt(serverResponse.commandResponse(command, dao)));
                     Save.execute(dao);
-                    System.out.println("dnwqnfhwpo");
 
                 } catch (NullPointerException e) {
                     System.out.println("Введённой вами команды не существует. Попробуйте ввести другую команду." + e.getLocalizedMessage()
@@ -88,16 +100,18 @@ public class ServerApp {
                     System.err.println("Клиент пока недоступен...такое случается.");
                     //жди......
 
+
                 }
 
             }
         } catch (IllegalArgumentException e) {
-            System.err.println("номера портов клиента и сервера не совпадают: " + e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
     //TODO этот чекер не работает...... вместе с ним ломается и клиент и сервер и вообще все падает
     private boolean checkConnection(Socket socket){
         //TODO надо как-то написать проверятель есть ли подсоединение или нет....
         //па ра ша
+        return false;
     }
 }
