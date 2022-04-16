@@ -2,6 +2,8 @@ package server.commands;
 
 import common.console.Console;
 import common.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 import common.utils.Route;
 import common.utils.RouteInfo;
 
@@ -11,10 +13,9 @@ import java.util.*;
  * Класс команды ADD IF MIN, предназначенный для добавления элементов в коллекцию, если он является наименьшим
  */
 public class AddIfMin extends ACommands{
-
     Console console = new Console();
 
-    public String execute(RouteDAO routeDAO) {
+    public Response execute(RouteDAO routeDAO) {
         Optional<Route> minRoute = routeDAO.getAll().stream().min(Comparator.comparingInt(Route::getDistance));
 
         Integer minDistance = minRoute.isPresent() ? minRoute.get().getDistance() : Integer.MAX_VALUE;
@@ -28,15 +29,18 @@ public class AddIfMin extends ACommands{
                             info.distance);
                     routeDAO.create(route);
                 } else {
-
-                    return ("у нового элемента поле distance больше чем у минимального. вызовите команду заново с валидным полем distance");
+                    response.setMsg("\"у нового элемента поле distance больше чем у минимального. вызовите команду заново с валидным полем distance\"");
+                    response.setStatus(Status.USER_EBLAN_ERROR);
                 }
             } catch (RuntimeException e) {
-                return ("невозможно добавить элемент в коллекцию: " + e.getMessage());
+                response.setMsg("невозможно добавить элемент в коллекцию: " + e.getMessage());
+                response.setStatus(Status.COLLECTION_ERROR);
             }
         }
-        else return ("в коллекции уже лежит элемент с минимальным возможным значением поля distance");
-        return "а что тут писать я не знаю";
+        else
+            response.setMsg("в коллекции уже лежит элемент с минимальным возможным значением поля distance");
+            response.setStatus(Status.COLLECTION_ERROR);
+            return response;
     }
 
 }

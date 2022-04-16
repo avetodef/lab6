@@ -2,6 +2,8 @@ package server.commands;
 
 import common.console.Console;
 import common.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 import common.utils.Route;
 import common.utils.RouteInfo;
 
@@ -18,30 +20,35 @@ public class UpdateById extends ACommands {
     }
 
 
-    public String execute(RouteDAO routeDAO) {
+    public Response execute(RouteDAO routeDAO) {
 
             int idFromConsole = Integer.parseInt(args.get(1));
             if (routeDAO.getAll().size() == 0) {
-                System.out.println("коллекция пустая. нечего обновлять");
+                response.setMsg("коллекция пустая. нечего обновлять");
+                response.setStatus(Status.COLLECTION_ERROR);
             } else {
 
                 if (!checkId(idFromConsole, routeDAO))
-                    System.out.println("элемента с таким id нет. ведите другой id");
+                {response.setMsg("элемента с таким id нет. ведите другой id");
+                response.setStatus(Status.USER_EBLAN_ERROR);}
                 else {
                     try {
                         routeDAO.update(idFromConsole, info);
                     }
                     catch (IndexOutOfBoundsException e){
-                        System.out.println("брат забыл айди ввести походу");
+                        response.setMsg("брат забыл айди ввести походу");
+                        response.setStatus(Status.USER_EBLAN_ERROR);
                     }
                     catch (RuntimeException e) {
-                        output("неверный ввод");
+                        response.setMsg("чета проихошло...");
+                        response.setStatus(Status.UNKNOWN_ERROR);
                     }
-                    return("элемент коллекции обновлен");
+                    response.setMsg("элемент коллекции обновлен");
+                    response.setStatus(Status.OK);
                 }
 
             }
-            return  "я не знаю в какой ситуации команда зайдет в этот ретерн:)))";
+            return response;
 //        if (routeDAO.getAll().size() != 0){
 //            if (checkId(idFromConsole, routeDAO)){
 //                try {

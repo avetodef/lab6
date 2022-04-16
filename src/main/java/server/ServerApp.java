@@ -4,6 +4,8 @@ import common.console.ConsoleOutputer;
 import common.dao.RouteDAO;
 import common.exceptions.EmptyInputException;
 import common.exceptions.ExitException;
+import common.interaction.Request;
+import common.interaction.Response;
 import common.json.JsonConverter;
 import common.utils.IdGenerator;
 import server.commands.ACommands;
@@ -27,7 +29,7 @@ public class ServerApp {
 
         IdGenerator.reloadId(dao);
         ACommands command;
-        ServerResponse serverResponse = new ServerResponse();
+        Response serverResponse;
 
         try {
             int port = 6666;
@@ -55,7 +57,7 @@ public class ServerApp {
 
                 try {
 
-                    String commandFromClient;
+                    String requestJson;
                     StringBuilder builder = new StringBuilder();
                     int byteRead;
 
@@ -66,26 +68,31 @@ public class ServerApp {
 
                     System.out.println("builder: "+builder);
 
-                    commandFromClient = builder.toString();
-                    builder = new StringBuilder();
-                    command = CommandSaver.getCommand((Objects.requireNonNull(JsonConverter.deserialize(commandFromClient))));
-                    //это полная поебота
-                    if (command.isAsker()){
-                        String routeInfo;
-                        int byteInfo;
+                    requestJson = builder.toString();
 
-                        while ((byteInfo = socketInputStream.read())!= -1){
-                            if (byteInfo == 0) break;
-                            builder.append( (char) byteInfo );
-                        }
+                    Request request = JsonConverter.des(requestJson);
+                    System.out.println(requestJson);
+                    command = ACommands.getCommand(request);
 
-                        routeInfo = builder.toString();
-                        command.setInfo(JsonConverter.desToRouteInfo(routeInfo));
-                        System.out.println(routeInfo);
-                    }
-                    command.execute(dao);
+//                    builder = new StringBuilder();
+//                    command = CommandSaver.getCommand((Objects.requireNonNull(JsonConverter.deserialize(requestJson))));
+//
+//                    if (command.isAsker()){
+//                        String routeInfo;
+//                        int byteInfo;
+//
+//                        while ((byteInfo = socketInputStream.read())!= -1){
+//                            if (byteInfo == 0) break;
+//                            builder.append( (char) byteInfo );
+//                        }
+//
+//                        routeInfo = builder.toString();
+//                        command.setInfo(JsonConverter.desToRouteInfo(routeInfo));
+//                        System.out.println(routeInfo);
+//                    }
 
-                    dataOutputStream.writeUTF(serverResponse.commandResponse(command, dao));
+                    serverResponse = command.execute(dao);
+                    dataOutputStream.writeUTF(JsonConverter.serResponse(serverResponse));
 
                     Save.execute(dao);
 

@@ -6,6 +6,8 @@ import common.console.ConsoleReader;
 import common.dao.RouteDAO;
 import common.exceptions.EmptyInputException;
 import common.exceptions.ExitException;
+import common.interaction.Request;
+import common.interaction.Response;
 import common.json.JsonConverter;
 import common.utils.IdGenerator;
 import common.utils.RouteInfo;
@@ -44,7 +46,7 @@ public class ClientApp {
         IdGenerator.reloadId(dao);
         List<String> input;
         String serverResponse;
-
+        Request request;
 
         try {
 
@@ -56,26 +58,22 @@ public class ClientApp {
 
         socketChannel.connect(new InetSocketAddress("localhost", serverPort));
 
-
         while (true) {
             try {
 
                 input = consoleReader.reader();
-                System.out.println(input);
+                request = new Request(input, null);
                 ifExit(input, dao);
                 if (CommandSaver.checkCommand(input)) {
                     ACommands command = CommandSaver.getCommand(input);
 
-                    // получается что если из аскер тру то тогда у меня вызывается запрос с консоли
-                    // а потом он сериализуется и отправляется серверу
-                    // а потом сервер его переделывается в нужный формат и уже с ним работает... интересно
-                    // или я неправильно придумала...ну ниче узнаю :)))
-
-                    socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.serialize(input)));
+                    //socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.serialize(input)));
                     if (command.isAsker()){
                         RouteInfo info = console.info();
-                        socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.serRouteInfo(info)));
+                        request.setInfo(info);
+                        //socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.serRouteInfo(info)));
                     }
+                    socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.ser(request)));
 
                     System.out.println("команда отправляется на сервер...");
                 } else
@@ -84,8 +82,10 @@ public class ClientApp {
                 socketChannel.read(buffer);
                 buffer.flip();
 
-                serverResponse = StandardCharsets.UTF_8.decode(buffer).toString();
-                System.out.println(serverResponse.substring(2));
+                serverResponse = StandardCharsets.UTF_8.decode(buffer).toString().substring(2);
+                Response response = JsonConverter.desResponse(serverResponse);
+                printPrettyResponse(response);
+
                 buffer.clear();
 
 
@@ -123,7 +123,7 @@ public class ClientApp {
                     System.out.println("скажи пожалуйста.... yes или no");
             }
         }
-        System.out.println("пытаюсь переподключиться...");
+        System.out.println("жди...если еще раз выкинется что сервер недоступен то еще подожди. а если не выкинется значит все хорошо");
     }
     }
 
@@ -181,6 +181,16 @@ public class ClientApp {
                     "--------------------                    --------------------");
 
             Exit.execute(dao);
+        }
+    }
+
+    private void printPrettyResponse(Response r){
+        switch (r.status){
+            case OK -> output.printGreen(r.msg);
+            case FILE_ERROR -> output.printBlue(r.msg);
+            case UNKNOWN_ERROR -> output.printRed(r.msg);
+            case COLLECTION_ERROR -> output.printYellow(r.msg);
+            case USER_EBLAN_ERROR -> output.printPurple(r.msg);
         }
     }
 }

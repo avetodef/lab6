@@ -1,6 +1,8 @@
 package server.commands;
 
 import common.dao.RouteDAO;
+import common.interaction.Request;
+import common.interaction.Response;
 import common.utils.RouteInfo;
 
 import java.util.List;
@@ -12,7 +14,7 @@ public abstract class ACommands {
     public void addArgs(List<String> args) {
         this.args = args;
     }
-    public String execute(RouteDAO routeDAO){ return " "; }
+    public abstract Response execute(RouteDAO routeDAO);
     protected boolean isAsker;
     protected RouteInfo info;
 
@@ -20,7 +22,15 @@ public abstract class ACommands {
         this.info = info;
     }
 
+    public static ACommands getCommand(Request request){
+        ACommands command = CommandSaver.getCommand(request.getArgs());
+        command.setInfo(request.getInfo());
+        return command;
+    }
+
     public boolean isAsker() {
         return isAsker;
     }
+
+    public Response response = new Response();
 }

@@ -1,6 +1,8 @@
 package server.commands;
 
 import common.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 
 /**
  * Класс команды REMOVE BY ID, предназначенный для удаления элемента по его id
@@ -9,26 +11,33 @@ import common.dao.RouteDAO;
  */
 public class RemoveById extends ACommands {
 
-    public String execute(RouteDAO routeDAO) {
+    public Response execute(RouteDAO routeDAO) {
         if (routeDAO.getAll().size() == 0) {
-            return ("коллекция пустая. нечего удалять");
+            response.setMsg("коллекция пустая. нечего удалять");
+            response.setStatus(Status.COLLECTION_ERROR);
         } else {
             try {
                 int id = Integer.parseInt(args.get(1));
                 if (routeDAO.delete(id)) {
-                    return "нет элемента с таким id. введите команду заново с правильным id" ;
+                    response.setMsg("нет элемента с таким id. введите команду заново с правильным id" );
+                    response.setStatus(Status.USER_EBLAN_ERROR);
                 } else {
-                    return "элемент успешно удален";
+                    response.setMsg("элемент успешно удален");
+                    response.setStatus(Status.OK);
 
                 }
             }
             catch (IndexOutOfBoundsException e){
-                return ("брат забыл айди ввести походу " + Integer.parseInt(args.get(1)) + " " + e.getMessage());
+                response.setMsg("брат забыл айди ввести походу ");
+                response.setStatus(Status.USER_EBLAN_ERROR);
             }
             catch (RuntimeException e) {
-                return ("непредвиденная ошибка в классе команды: " + e.getMessage());
+                response.setMsg("непредвиденная ошибка в классе команды: " + e.getMessage());
+                response.setStatus(Status.UNKNOWN_ERROR);
             }
 
         }
+        return response;
     }
+
 }

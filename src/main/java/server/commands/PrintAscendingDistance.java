@@ -2,6 +2,8 @@ package server.commands;
 
 
 import common.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 import common.utils.Route;
 
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ import java.util.List;
 public class PrintAscendingDistance extends ACommands{
 
 
-    public String execute(RouteDAO routeDAO) {
+    public Response execute(RouteDAO routeDAO) {
 
         StringBuilder builder = new StringBuilder();
         routeDAO.getAll().stream()
@@ -23,9 +25,13 @@ public class PrintAscendingDistance extends ACommands{
                 .forEach(r->builder.append(r.getDistance()).append(" "));
 
 
-        if (routeDAO.getAll().size() == 0)
-            return "коллекция пустая. нечего выводить";
-        else
-            return "значения поля distance всех элементов в порядке возрастания: " + builder;
+        if (routeDAO.getAll().size() == 0){
+            response.setMsg("коллекция пустая. нечего выводить");
+            response.setStatus(Status.COLLECTION_ERROR);}
+        else{
+            response.setMsg("значения поля distance всех элементов в порядке возрастания: " + builder);
+            response.setStatus(Status.OK);
+        }
+        return response;
     }
 }

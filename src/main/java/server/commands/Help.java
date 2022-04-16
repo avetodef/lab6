@@ -1,6 +1,8 @@
 package server.commands;
 
 import common.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 
 
 /**
@@ -8,9 +10,9 @@ import common.dao.RouteDAO;
  */
 public class Help extends ACommands {
 
-    public String execute(RouteDAO routeDAO) {
+    public Response execute(RouteDAO routeDAO) {
 //        CommandSaver.commandDescription.forEach((key,value) -> responsePrinter.appendln(key + value));
-       return "help : вывести справку по доступным командам " + System.lineSeparator() +
+       response.setMsg("help : вывести справку по доступным командам " + System.lineSeparator() +
                "info: вывести в стандартный поток вывода информацию о коллекции (тип, дата инициализации, количество элементов и т.д.) "
                + System.lineSeparator() +
                "show: " + "вывести в стандартный поток вывода все элементы коллекции в строковом представлении "
@@ -42,7 +44,9 @@ public class Help extends ACommands {
                + System.lineSeparator() +
         "print_descending_distance :  вывести значения поля distance всех элементов в порядке убывания "
                + System.lineSeparator() +
-        "rzhaka: новая попытка защиты, новый сюрприз специально только для alex_egosin!!!";
+        "rzhaka: новая попытка защиты, новый сюрприз специально только для alex_egosin!!!");
+       response.setStatus(Status.OK);
+       return response;
     }
 
 }
