@@ -6,6 +6,7 @@ import common.exceptions.EmptyInputException;
 import common.exceptions.ExitException;
 import common.interaction.Request;
 import common.interaction.Response;
+import common.interaction.Status;
 import common.json.JsonConverter;
 import common.utils.IdGenerator;
 import server.commands.ACommands;
@@ -30,7 +31,8 @@ public class ServerApp {
         IdGenerator.reloadId(dao);
         ACommands command;
         Response serverResponse;
-
+        Response errorResponse = new Response();
+        errorResponse.setStatus(Status.SERVER_ERROR);
         try {
             int port = 6666;
             outputer.printPurple("Ожидаю подключение клиента");
@@ -61,12 +63,12 @@ public class ServerApp {
                     StringBuilder builder = new StringBuilder();
                     int byteRead;
 
-                    while((byteRead = socketInputStream.read())!=-1) {
+                    while ((byteRead = socketInputStream.read()) != -1) {
                         if (byteRead == 0) break;
                         builder.append((char) byteRead);
                     }
 
-                    System.out.println("builder: "+builder);
+                    System.out.println("builder: " + builder);
 
                     requestJson = builder.toString();
 
@@ -97,29 +99,29 @@ public class ServerApp {
                     Save.execute(dao);
 
                 } catch (NullPointerException e) {
-                    System.out.println("Введённой вами команды не существует. Попробуйте ввести другую команду." + e.getLocalizedMessage()
+                    errorResponse.setMsg("Введённой вами команды не существует. Попробуйте ввести другую команду." + e.getLocalizedMessage()
                             + e.getCause());
+                    dataOutputStream.writeUTF(JsonConverter.serResponse(errorResponse));
                 } catch (NoSuchElementException e) {
                     throw new ExitException("пока............");
-                } catch (EmptyInputException e) {
-                    outputer.printRed("ошибка на сервере: " + e.getLocalizedMessage());
-                } catch (IndexOutOfBoundsException e) {
-                    outputer.printRed("брат забыл айди ввести походу" + e.getMessage());
+                }
+                catch (BindException e) {
                     e.printStackTrace();
-                } catch (BindException e) {
-                    System.out.println(e.getLocalizedMessage());
+                }
+                catch (UTFDataFormatException e){
+                    errorResponse.setMsg("зачем прогу ломаешь");
+                    dataOutputStream.writeUTF(JsonConverter.serResponse(errorResponse));
+
                 }
                 //TODO выкидывает бесконечный поток исключений если соединение преравно :)))
                 catch (IOException exception) {
                     System.err.println("Клиент пока недоступен...такое случается.");
+                    exception.printStackTrace();
                     //жди......
                     break;
 
 
                 }
-//                catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
 
             }
         } catch (IllegalArgumentException e) {

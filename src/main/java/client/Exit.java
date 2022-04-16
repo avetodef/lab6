@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
  */
 public class Exit  {
 
-    public static String execute(RouteDAO routeDAO) {
+    public static String execute() {
 
         //System.out.println("пока.");
             try {

@@ -18,7 +18,7 @@ public class RemoveById extends ACommands {
         } else {
             try {
                 int id = Integer.parseInt(args.get(1));
-                if (routeDAO.delete(id)) {
+                if (!routeDAO.delete(id)) {
                     response.setMsg("нет элемента с таким id. введите команду заново с правильным id" );
                     response.setStatus(Status.USER_EBLAN_ERROR);
                 } else {
@@ -29,6 +29,10 @@ public class RemoveById extends ACommands {
             }
             catch (IndexOutOfBoundsException e){
                 response.setMsg("брат забыл айди ввести походу ");
+                response.setStatus(Status.USER_EBLAN_ERROR);
+            }
+            catch (NumberFormatException e){
+                response.setMsg("леее почему не int ввел братан");
                 response.setStatus(Status.USER_EBLAN_ERROR);
             }
             catch (RuntimeException e) {

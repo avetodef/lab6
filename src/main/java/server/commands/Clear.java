@@ -24,7 +24,7 @@ public class Clear extends ACommands{
             routeDAO.clear();
             distanceSet.clear();
 
-            response.setMsg("в коллекции уже лежит элемент с минимальным возможным значением поля distance");
+            response.setMsg("ура удалилось");
             response.setStatus(Status.OK);
             return response;
     }

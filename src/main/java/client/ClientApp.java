@@ -3,13 +3,11 @@ package client;
 import common.console.Console;
 import common.console.ConsoleOutputer;
 import common.console.ConsoleReader;
-import common.dao.RouteDAO;
 import common.exceptions.EmptyInputException;
 import common.exceptions.ExitException;
 import common.interaction.Request;
 import common.interaction.Response;
 import common.json.JsonConverter;
-import common.utils.IdGenerator;
 import common.utils.RouteInfo;
 import server.commands.ACommands;
 import server.commands.CommandSaver;
@@ -21,7 +19,6 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -29,8 +26,7 @@ import java.util.Scanner;
 
 public class ClientApp {
 
-     FileManager manager = new FileManager();
-     RouteDAO dao = manager.read();
+
      ConsoleReader consoleReader = new ConsoleReader();
      ConsoleOutputer output = new ConsoleOutputer();
      Scanner fromKeyboard = new Scanner(System.in);
@@ -43,7 +39,7 @@ public class ClientApp {
 
     protected  void mainClientLoop() {
 
-        IdGenerator.reloadId(dao);
+
         List<String> input;
         String serverResponse;
         Request request;
@@ -63,15 +59,13 @@ public class ClientApp {
 
                 input = consoleReader.reader();
                 request = new Request(input, null);
-                ifExit(input, dao);
+                ifExit(input);
                 if (CommandSaver.checkCommand(input)) {
                     ACommands command = CommandSaver.getCommand(input);
 
-                    //socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.serialize(input)));
                     if (command.isAsker()){
                         RouteInfo info = console.info();
                         request.setInfo(info);
-                        //socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.serRouteInfo(info)));
                     }
                     socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.ser(request)));
 
@@ -164,7 +158,7 @@ public class ClientApp {
         System.out.println("Для того чтобы начать введите команду. Чтобы увидеть список доступных команд введите help");
     }
 
-    private  void ifExit(List<String> command, RouteDAO dao){
+    private  void ifExit(List<String> command){
 
         if (command.contains("exit")){
             output.printPurple("   _______________                        |*\\_/*|________\n" +
@@ -180,7 +174,7 @@ public class ClientApp {
                     " /  ************  \\                      /  ************  \\\n" +
                     "--------------------                    --------------------");
 
-            Exit.execute(dao);
+            Exit.execute();
         }
     }
 
@@ -191,6 +185,7 @@ public class ClientApp {
             case UNKNOWN_ERROR -> output.printRed(r.msg);
             case COLLECTION_ERROR -> output.printYellow(r.msg);
             case USER_EBLAN_ERROR -> output.printPurple(r.msg);
+            case SERVER_ERROR -> output.printWhite(r.msg);
         }
     }
 }
