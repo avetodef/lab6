@@ -14,13 +14,13 @@ import java.util.*;
  * Класс команды EXECUTE SCRIPT, предназначенный для чтения и исполнения скрипта из файла
  */
 public class ExecuteScript extends ACommands{
-    //TODO почему не работет апдейт бай айди.
+    //TODO эта параша нихуя не работает и я боюсь сюда лезть. @ника чини. /беззлобно
     FileManager manager = new FileManager();
     RouteDAO dao = manager.read();
 
     public String execute(RouteDAO routeDAO) {
 
-        String nameOfScript = args.get(0);
+        String nameOfScript = args.get(1);
         if (ExecuteReader.checkNameOfFileInList(nameOfScript)) {
             ExecuteReader.listOfNamesOfScripts.add(nameOfScript);
             try {

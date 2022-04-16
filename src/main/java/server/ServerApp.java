@@ -37,44 +37,56 @@ public class ServerApp {
             // TODO сделать чтобы сервер ждал пока клиент не подключится даже если клиент упадет
 
             Socket socket = serverSocket.accept();
-
-            System.out.println(socket.isConnected()); //true
-            outputer.printPurple("Клиент подключился");
-
-            // Берем входной и выходной потоки сокета, теперь можем получать и отсылать данные клиенту.
             InputStream socketInputStream = socket.getInputStream();
             OutputStream socketOutputStream = socket.getOutputStream();
 
             DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
+
+            System.out.println(socket.isConnected()); //true
+            outputer.printPurple("Клиент подключился");
+
+
 //            Selector selector = Selector.open();
 //            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
 //            InetSocketAddress hostAddress = new InetSocketAddress("localhost", port);
 //            serverSocketChannel.bind(hostAddress);
 
             while (true) {
+
                 try {
 
                     String commandFromClient;
                     StringBuilder builder = new StringBuilder();
                     int byteRead;
+
                     while((byteRead = socketInputStream.read())!=-1) {
-                        if(byteRead == 0)
-                            break;
+                        if (byteRead == 0) break;
                         builder.append((char) byteRead);
                     }
-                    System.out.println(builder);
+
+                    System.out.println("builder: "+builder);
 
                     commandFromClient = builder.toString();
-
+                    builder = new StringBuilder();
                     command = CommandSaver.getCommand((Objects.requireNonNull(JsonConverter.deserialize(commandFromClient))));
+                    //это полная поебота
+                    if (command.isAsker()){
+                        String routeInfo;
+                        int byteInfo;
 
+                        while ((byteInfo = socketInputStream.read())!= -1){
+                            if (byteInfo == 0) break;
+                            builder.append( (char) byteInfo );
+                        }
+
+                        routeInfo = builder.toString();
+                        command.setInfo(JsonConverter.desToRouteInfo(routeInfo));
+                        System.out.println(routeInfo);
+                    }
                     command.execute(dao);
 
-                    //socketOutputStream.write(Integer.parseInt(serverResponse.commandResponse(command, dao))); не работает...
-//                    OutputStreamWriter osw = new OutputStreamWriter(socketOutputStream, StandardCharsets.UTF_8);
-//                    osw.write(serverResponse.commandResponse(command, dao));
                     dataOutputStream.writeUTF(serverResponse.commandResponse(command, dao));
-//                    dataOutputStream.wait();
+
                     Save.execute(dao);
 
                 } catch (NullPointerException e) {
@@ -85,7 +97,8 @@ public class ServerApp {
                 } catch (EmptyInputException e) {
                     outputer.printRed("ошибка на сервере: " + e.getLocalizedMessage());
                 } catch (IndexOutOfBoundsException e) {
-                    outputer.printRed("брат забыл айди ввести походу");
+                    outputer.printRed("брат забыл айди ввести походу" + e.getMessage());
+                    e.printStackTrace();
                 } catch (BindException e) {
                     System.out.println(e.getLocalizedMessage());
                 }

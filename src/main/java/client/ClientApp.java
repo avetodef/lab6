@@ -1,5 +1,6 @@
 package client;
 
+import common.console.Console;
 import common.console.ConsoleOutputer;
 import common.console.ConsoleReader;
 import common.dao.RouteDAO;
@@ -7,6 +8,8 @@ import common.exceptions.EmptyInputException;
 import common.exceptions.ExitException;
 import common.json.JsonConverter;
 import common.utils.IdGenerator;
+import common.utils.RouteInfo;
+import server.commands.ACommands;
 import server.commands.CommandSaver;
 import server.file.FileManager;
 
@@ -14,25 +17,28 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
+
 
 public class ClientApp {
 
      FileManager manager = new FileManager();
      RouteDAO dao = manager.read();
      ConsoleReader consoleReader = new ConsoleReader();
-     ConsoleOutputer outputer = new ConsoleOutputer();
+     ConsoleOutputer output = new ConsoleOutputer();
      Scanner fromKeyboard = new Scanner(System.in);
-    ByteBuffer buffer = ByteBuffer.allocate(40000);
+     ByteBuffer buffer = ByteBuffer.allocate(40000);
+     Console console =  new Console();
+
     //TODO обработать пицот миллионов поломок джокера по типу поменял порт, подключил два клиента, еще что-нибудь
     //TODO сделать чтобы передавались не строки а объекты класса реквест и респонз (сообщение егошина момент)
     int serverPort = 6666;
+
     protected  void mainClientLoop() {
 
         IdGenerator.reloadId(dao);
@@ -40,52 +46,58 @@ public class ClientApp {
         String serverResponse;
 
 
-    try {
+        try {
 
         SocketChannel socketChannel = SocketChannel.open();
         //TODO оно не работает если поставить false...
-        socketChannel.configureBlocking(false); //подключается если блокирующий канал... если неблокирующий то не подключается
+        socketChannel.configureBlocking(true); //подключается если блокирующий канал... если неблокирующий то не подключается
 
         //todo нужнл все переделывать селекторами.
 
         socketChannel.connect(new InetSocketAddress("localhost", serverPort));
 
-        System.out.println(socketChannel.isConnected());
 
         while (true) {
             try {
 
                 input = consoleReader.reader();
-
-                List<String> toCheck = input;
+                System.out.println(input);
                 ifExit(input, dao);
+                if (CommandSaver.checkCommand(input)) {
+                    ACommands command = CommandSaver.getCommand(input);
 
-                if (CommandSaver.checkCommand(toCheck)) {
+                    // получается что если из аскер тру то тогда у меня вызывается запрос с консоли
+                    // а потом он сериализуется и отправляется серверу
+                    // а потом сервер его переделывается в нужный формат и уже с ним работает... интересно
+                    // или я неправильно придумала...ну ниче узнаю :)))
+
                     socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.serialize(input)));
+                    if (command.isAsker()){
+                        RouteInfo info = console.info();
+                        socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.serRouteInfo(info)));
+                    }
 
                     System.out.println("команда отправляется на сервер...");
-                }
-                else
+                } else
                     throw new NullPointerException("Введённой вами команды не существует. Попробуйте ввести другую команду.");
-
 
                 socketChannel.read(buffer);
                 buffer.flip();
 
                 serverResponse = StandardCharsets.UTF_8.decode(buffer).toString();
-                System.out.println(serverResponse);
+                System.out.println(serverResponse.substring(2));
                 buffer.clear();
 
 
             }
             catch (NullPointerException e) {
-                outputer.printRed("Введённой вами команды не существует. Попробуйте ввести другую команду.");
+                output.printRed("Введённой вами команды не существует. Попробуйте ввести другую команду.");
             }
             catch (EmptyInputException e) {
-                outputer.printRed(e.getMessage());
+                output.printRed(e.getMessage());
             }
             catch (IndexOutOfBoundsException e) {
-                outputer.printRed("брат забыл айди ввести походу");
+                output.printRed("брат забыл айди ввести походу");
             }
             catch (NoSuchElementException e) {
                 throw new ExitException("пока-пока");
@@ -135,7 +147,7 @@ public class ClientApp {
 
     protected void greetings() {
         //outputer.printCyan("\t\t\t\t\t▒██░░░─░▄█▀▄─░▐█▀▄──░▄█▀▄─     ▒█▀▀ \n\t\t\t\t\t▒██░░░░▐█▄▄▐█░▐█▀▀▄░▐█▄▄▐█     ▒▀▀▄ \n\t\t\t\t\t▒██▄▄█░▐█─░▐█░▐█▄▄▀░▐█─░▐█     ▒▄▄▀ ");
-        outputer.printCyan("__________                                 \n" +
+        output.printCyan("          __________                                 \n" +
                 "         .'----------`.                              \n" +
                 "         | .--------. |                             \n" +
                 "         | | LABA 6 | |       ___________              \n" +
@@ -149,14 +161,13 @@ public class ClientApp {
                 "+-----------------------------------------------------+\n" +
                 "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ");
 
-        //outputer.printCyan("\t\t\t\t\t\tNika and Sofia production\n");
         System.out.println("Для того чтобы начать введите команду. Чтобы увидеть список доступных команд введите help");
     }
 
     private  void ifExit(List<String> command, RouteDAO dao){
 
         if (command.contains("exit")){
-            outputer.printPurple("  _______________                        |*\\_/*|________\n" +
+            output.printPurple("   _______________                        |*\\_/*|________\n" +
                     "  |  ___________  |     .-.     .-.      ||_/-\\_|______  |\n" +
                     "  | |           | |    .****. .****.     | |           | |\n" +
                     "  | |   0   0   | |    .*****.*****.     | |   0   0   | |\n" +

@@ -13,23 +13,25 @@ import java.util.NoSuchElementException;
  */
 public class Add extends ACommands{
     Console console = new Console();
-
+    {
+        isAsker = true;
+    }
     public String execute(RouteDAO routeDAO) {
         try {
-            RouteInfo info = console.info();
             Route route = new Route(info.name, info.x, info.y, info.fromX,
                     info.fromY, info.nameFrom, info.toX, info.toY, info.nameTo,
                     info.distance);
             routeDAO.create(route);
         }catch (NoSuchElementException e){throw new ExitException(e.getMessage());}
         catch (NullPointerException e){
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
         catch (RuntimeException e) {
             e.printStackTrace();
-            return "невозможно добавить элемент в коллекцию" + System.lineSeparator();
+            return "невозможно добавить элемент в коллекцию" + e.getMessage();
 
         }
         return "элемент добавлен в коллекцию";
+        //:(
     }
 }

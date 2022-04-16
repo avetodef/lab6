@@ -1,7 +1,9 @@
 package common.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import common.utils.RouteInfo;
 
 import java.util.List;
 
@@ -29,4 +31,25 @@ public class JsonConverter {
         return null;
     }
 
+
+    public static String serRouteInfo(RouteInfo info){
+        String output = " ";
+        try{
+            output = new ObjectMapper().writeValueAsString(info);
+        }
+        catch (JsonProcessingException e) {
+            System.out.println("беды с сериализацией: " + e.getMessage() + " " + e.getCause());
+        }
+        return output + "\0";
+    }
+
+    public static RouteInfo desToRouteInfo(String s){
+        RouteInfo ouput = null;
+        try{
+            ouput = new ObjectMapper().readValue(s, RouteInfo.class);
+        } catch (JsonProcessingException e) {
+            System.out.println("проблемы десериализации: " + e.getMessage());
+        }
+        return ouput;
+    }
 }
