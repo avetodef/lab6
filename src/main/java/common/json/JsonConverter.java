@@ -36,7 +36,7 @@ public class JsonConverter {
         try {
             ouput = new ObjectMapper().writeValueAsString(r);
         } catch (JsonProcessingException e) {
-            System.out.println("nwqipfjopqwfhiq");
+            System.out.println("КАКОЙ ЖЕ ТЫ......говно. залупа. пенис. хер. давалка. хуй. блядина. головка. шлюха. жопа. член. еблан. петух. мудила. рукоблуд. ссанина. очко. блядун. вагина. сука. ебланище. влагалище. пердун. дрочила. пидор. пизда. туз. молофья. гомик. мудила. пилотка. манда. анус. вагина. путана. педрила. шалава. хуила. машонка. елда.");
         }
         return ouput;
     }

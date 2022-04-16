@@ -2,29 +2,38 @@ package server;
 
 import common.console.ConsoleOutputer;
 import common.dao.RouteDAO;
-import common.exceptions.EmptyInputException;
+import common.exceptions.ClosedConnectionException;
+import common.exceptions.ConnectionException;
 import common.exceptions.ExitException;
+import common.exceptions.InvalidReceivedException;
 import common.interaction.Request;
 import common.interaction.Response;
 import common.interaction.Status;
 import common.json.JsonConverter;
 import common.utils.IdGenerator;
 import server.commands.ACommands;
-import server.commands.CommandSaver;
 import server.commands.Save;
 import server.file.FileManager;
+
 import java.io.*;
 import java.net.BindException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.DatagramChannel;
 import java.util.NoSuchElementException;
-import java.util.Objects;
+
+import static ch.qos.logback.contrib.jackson.JacksonJsonFormatter.BUFFER_SIZE;
 
 public class ServerApp {
 
     FileManager manager = new FileManager();
     RouteDAO dao = manager.read();
     ConsoleOutputer outputer = new ConsoleOutputer();
+    private InetSocketAddress clientAddress;
+    private DatagramChannel channel;
 
     protected void mainServerLoop() throws IOException {
 
@@ -33,6 +42,7 @@ public class ServerApp {
         Response serverResponse;
         Response errorResponse = new Response();
         errorResponse.setStatus(Status.SERVER_ERROR);
+
         try {
             int port = 6666;
             outputer.printPurple("Ожидаю подключение клиента");
@@ -114,24 +124,37 @@ public class ServerApp {
 
                 }
                 //TODO выкидывает бесконечный поток исключений если соединение преравно :)))
-                catch (IOException exception) {
+
+                /* catch (IOException exception) {
                     System.err.println("Клиент пока недоступен...такое случается.");
                     exception.printStackTrace();
                     //жди......
-                    break;
-
-
-                }
-
+                    break;*/
             }
+
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
-    //TODO этот чекер не работает...... вместе с ним ломается и клиент и сервер и вообще все падает
-    private boolean checkConnection(Socket socket){
-        //TODO надо как-то написать проверятель есть ли подсоединение или нет....
-        //па ра ша
-        return false;
+
+//TODO я не ебу правильный ли у меня вообще ход мыслей.... возможно надо сделать как-то иначе
+    public Request receive() throws ConnectionException, InvalidReceivedException {
+
+        ByteBuffer buf = ByteBuffer.allocate(BUFFER_SIZE);
+        try {
+            clientAddress = (InetSocketAddress) channel.receive(buf);
+            //("Мы получили запрос от " + clientAddress.toString());
+        }catch (ClosedChannelException e){
+            throw new ClosedConnectionException();
+        } catch(IOException e){
+            throw new ConnectionException("Клиента надо бы подключить. (Было бы славно...)");
+        }
+        try{
+            ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(buf.array()));
+            Request req  = (Request) objectInputStream.readObject();
+            return req;
+        } catch(ClassNotFoundException|ClassCastException|IOException e){
+            throw new InvalidReceivedException();
+        }
     }
 }

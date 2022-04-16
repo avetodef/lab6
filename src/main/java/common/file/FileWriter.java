@@ -12,7 +12,7 @@ public class FileWriter {
 
 
     private static String directory = System.getenv().get("collection.csv");
-    private static final String TEMP_FILE = "C:/collection_temp.csv";
+    private static final String TEMP_FILE = "C:\\collection.csv";
     File file = new File(directory);
     /**
      * Метод записи данных о коллекции в файл
