@@ -30,6 +30,5 @@ public class Request implements Serializable {
         this.info = info;
     }
 
-    public Request() {
-    }
+    public Request() {}
 }

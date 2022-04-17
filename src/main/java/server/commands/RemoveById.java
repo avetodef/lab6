@@ -19,6 +19,7 @@ public class RemoveById extends ACommands {
             try {
                 int id = Integer.parseInt(args.get(1));
                 if (!routeDAO.delete(id)) {
+                    //response.msg().status();
                     response.setMsg("нет элемента с таким id. введите команду заново с правильным id" );
                     response.setStatus(Status.USER_EBLAN_ERROR);
                 } else {

@@ -188,4 +188,6 @@ public class ClientApp {
             case SERVER_ERROR -> output.printWhite(r.msg);
         }
     }
+
+
 }

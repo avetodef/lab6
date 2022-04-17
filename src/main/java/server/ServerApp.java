@@ -20,9 +20,7 @@ import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.DatagramChannel;
+
 import java.util.NoSuchElementException;
 
 import static ch.qos.logback.contrib.jackson.JacksonJsonFormatter.BUFFER_SIZE;
@@ -32,8 +30,6 @@ public class ServerApp {
     FileManager manager = new FileManager();
     RouteDAO dao = manager.read();
     ConsoleOutputer outputer = new ConsoleOutputer();
-    private InetSocketAddress clientAddress;
-    private DatagramChannel channel;
 
     protected void mainServerLoop() throws IOException {
 
@@ -56,14 +52,9 @@ public class ServerApp {
 
             DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
 
-            System.out.println(socket.isConnected()); //true
+            //System.out.println(socket.isConnected()); //true
             outputer.printPurple("Клиент подключился");
 
-
-//            Selector selector = Selector.open();
-//            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-//            InetSocketAddress hostAddress = new InetSocketAddress("localhost", port);
-//            serverSocketChannel.bind(hostAddress);
 
             while (true) {
 
@@ -78,30 +69,13 @@ public class ServerApp {
                         builder.append((char) byteRead);
                     }
 
-                    System.out.println("builder: " + builder);
-
                     requestJson = builder.toString();
 
                     Request request = JsonConverter.des(requestJson);
+
                     System.out.println(requestJson);
                     command = ACommands.getCommand(request);
 
-//                    builder = new StringBuilder();
-//                    command = CommandSaver.getCommand((Objects.requireNonNull(JsonConverter.deserialize(requestJson))));
-//
-//                    if (command.isAsker()){
-//                        String routeInfo;
-//                        int byteInfo;
-//
-//                        while ((byteInfo = socketInputStream.read())!= -1){
-//                            if (byteInfo == 0) break;
-//                            builder.append( (char) byteInfo );
-//                        }
-//
-//                        routeInfo = builder.toString();
-//                        command.setInfo(JsonConverter.desToRouteInfo(routeInfo));
-//                        System.out.println(routeInfo);
-//                    }
 
                     serverResponse = command.execute(dao);
                     dataOutputStream.writeUTF(JsonConverter.serResponse(serverResponse));
@@ -125,11 +99,12 @@ public class ServerApp {
                 }
                 //TODO выкидывает бесконечный поток исключений если соединение преравно :)))
 
-                /* catch (IOException exception) {
+                 catch (IOException exception) {
                     System.err.println("Клиент пока недоступен...такое случается.");
                     exception.printStackTrace();
                     //жди......
-                    break;*/
+                    break;
+                }
             }
 
         } catch (IllegalArgumentException e) {
@@ -137,24 +112,4 @@ public class ServerApp {
         }
     }
 
-//TODO я не ебу правильный ли у меня вообще ход мыслей.... возможно надо сделать как-то иначе
-    public Request receive() throws ConnectionException, InvalidReceivedException {
-
-        ByteBuffer buf = ByteBuffer.allocate(BUFFER_SIZE);
-        try {
-            clientAddress = (InetSocketAddress) channel.receive(buf);
-            //("Мы получили запрос от " + clientAddress.toString());
-        }catch (ClosedChannelException e){
-            throw new ClosedConnectionException();
-        } catch(IOException e){
-            throw new ConnectionException("Клиента надо бы подключить. (Было бы славно...)");
-        }
-        try{
-            ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(buf.array()));
-            Request req  = (Request) objectInputStream.readObject();
-            return req;
-        } catch(ClassNotFoundException|ClassCastException|IOException e){
-            throw new InvalidReceivedException();
-        }
-    }
 }
