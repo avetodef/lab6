@@ -1,11 +1,9 @@
 package server.commands;
 
-import common.console.Console;
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import common.interaction.Response;
 import common.interaction.Status;
 import common.utils.Route;
-import common.utils.RouteInfo;
 
 import static common.console.ConsoleOutputer.output;
 
@@ -23,28 +21,31 @@ public class UpdateById extends ACommands {
     public Response execute(RouteDAO routeDAO) {
 
             int idFromConsole = Integer.parseInt(args.get(1));
-            if (routeDAO.getAll().size() == 0) {
-                response.setMsg("коллекция пустая. нечего обновлять");
-                response.setStatus(Status.COLLECTION_ERROR);
-            } else {
+            if (routeDAO.getAll().size() == 0)
+                response.msg("пусто. нечего обновлять").status(Status.COLLECTION_ERROR);
+
+             else {
 
                 if (!checkId(idFromConsole, routeDAO))
-                {response.setMsg("элемента с таким id нет. ведите другой id");
-                response.setStatus(Status.USER_EBLAN_ERROR);}
+                response.status(Status.USER_EBLAN_ERROR).msg("элемента с таким id нет. ведите другой id");
+
                 else {
                     try {
                         routeDAO.update(idFromConsole, info);
                     }
                     catch (IndexOutOfBoundsException e){
-                        response.setMsg("брат забыл айди ввести походу");
-                        response.setStatus(Status.USER_EBLAN_ERROR);
+                        response.msg("брат забыл айди ввести походу").status(Status.USER_EBLAN_ERROR);
+                    }
+                    catch (NumberFormatException e){
+                        response.msg("леее почему не int ввел братан").status(Status.USER_EBLAN_ERROR);
+
                     }
                     catch (RuntimeException e) {
-                        response.setMsg("чета проихошло...");
-                        response.setStatus(Status.UNKNOWN_ERROR);
+                        response.msg("чета проихошло..." + e.getMessage()).status(Status.UNKNOWN_ERROR);
+
                     }
-                    response.setMsg("элемент коллекции обновлен");
-                    response.setStatus(Status.OK);
+                    response.msg("элемент коллекции обновлен").status(Status.OK);
+
                 }
 
             }

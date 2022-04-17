@@ -1,4 +1,4 @@
-package common.file;
+package server.file;
 
 import java.util.Objects;
 

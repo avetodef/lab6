@@ -1,6 +1,6 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import common.exceptions.EmptyInputException;
 import common.interaction.Response;
 import common.interaction.Status;
@@ -40,27 +40,24 @@ public class ExecuteScript extends ACommands{
                         commands = CommandSaver.getCommand(args);
                         commands.execute(dao);
                     } catch (RuntimeException e) {
-                        response.setMsg("ты норм? в скрипте параша написана, переделывай");
-                        response.setStatus(Status.USER_EBLAN_ERROR);
+                        response.msg("ты норм? в скрипте параша написана, переделывай").
+                                status(Status.USER_EBLAN_ERROR);
                     }
                 }
             }
             catch (NoSuchFileException e){
-                response.setMsg("файл не найден");
-                response.setStatus(Status.FILE_ERROR);
+                response.msg("файл не найден").status(Status.FILE_ERROR);
             }
             catch (IOException e) {
-                response.setMsg("Все пошло по пизде, чекай мать: ");
-                response.setStatus(Status.UNKNOWN_ERROR);
+                response.msg("Все пошло по пизде, чекай мать: " + e.getMessage()).
+                        status(Status.UNKNOWN_ERROR);
 
             }
             ExecuteReader.listOfNamesOfScripts.clear();
         } else {
-            response.setMsg("пу пу пу.... обнаружена рекурсия");
-            response.setStatus(Status.USER_EBLAN_ERROR);
+            response.msg("пу пу пу.... обнаружена рекурсия").status(Status.USER_EBLAN_ERROR);
         }
-        response.setMsg("что-то не так произошло....");
-        response.setStatus(Status.UNKNOWN_ERROR);
+        response.msg("что-то не так произошло....").status(Status.UNKNOWN_ERROR);
 
         return response;
     }

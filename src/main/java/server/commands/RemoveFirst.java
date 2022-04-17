@@ -1,6 +1,6 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import common.interaction.Response;
 import common.interaction.Status;
 
@@ -10,14 +10,13 @@ import common.interaction.Status;
 public class RemoveFirst extends ACommands{
 
     public Response execute(RouteDAO routeDAO) {
-        if (routeDAO.getAll().size() == 0) {
-            response.setMsg("коллекция пустая. нечего удалять");
-            response.setStatus(Status.COLLECTION_ERROR);
-        } else {
+        if (routeDAO.getAll().size() == 0)
+            response.status(Status.COLLECTION_ERROR).msg("коллекция пустая. нечего удалять");
+            else {
             routeDAO.removeFirst();
-            //System.out.println(routeDAO.getSize());
-            response.setMsg("первый элемент коллекции успешно удален");
-            response.setStatus(Status.OK);
+            response.msg("первый элемент удалился ура")
+                            .status(Status.OK);
+
         }
         return response;
     }

@@ -1,6 +1,6 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import common.interaction.Request;
 import common.interaction.Response;
 import common.utils.RouteInfo;

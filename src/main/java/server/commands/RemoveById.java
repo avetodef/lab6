@@ -1,6 +1,6 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import common.interaction.Response;
 import common.interaction.Status;
 
@@ -18,27 +18,23 @@ public class RemoveById extends ACommands {
         } else {
             try {
                 int id = Integer.parseInt(args.get(1));
-                if (!routeDAO.delete(id)) {
-                    //response.msg().status();
-                    response.setMsg("нет элемента с таким id. введите команду заново с правильным id" );
-                    response.setStatus(Status.USER_EBLAN_ERROR);
-                } else {
-                    response.setMsg("элемент успешно удален");
-                    response.setStatus(Status.OK);
+                if (!routeDAO.delete(id))
+                    response.msg("нет элемента с таким id. введите команду заново с правильным id" ).
+                            status(Status.USER_EBLAN_ERROR);
+                 else
+                     response.msg("ура удалилось").status(Status.OK);
 
-                }
             }
             catch (IndexOutOfBoundsException e){
-                response.setMsg("брат забыл айди ввести походу ");
-                response.setStatus(Status.USER_EBLAN_ERROR);
+                response.status(Status.USER_EBLAN_ERROR).msg("брат забыл айди ввести походу ");
             }
             catch (NumberFormatException e){
-                response.setMsg("леее почему не int ввел братан");
-                response.setStatus(Status.USER_EBLAN_ERROR);
+                response.msg("леее почему не int ввел братан").status(Status.USER_EBLAN_ERROR);
+
             }
             catch (RuntimeException e) {
-                response.setMsg("непредвиденная ошибка в классе команды: " + e.getMessage());
-                response.setStatus(Status.UNKNOWN_ERROR);
+                response.msg("непредвиденная ошибка в классе команды: " + e.getMessage())
+                        .status(Status.UNKNOWN_ERROR);
             }
 
         }

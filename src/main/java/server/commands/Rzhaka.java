@@ -1,6 +1,6 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import common.interaction.Response;
 import common.interaction.Status;
 
@@ -87,8 +87,8 @@ public class Rzhaka extends ACommands{
                 "!,!!,!^~,^,~^_!~,^,yBWRQQQBQHHQWHD(ERQQBRRBgBRRQHQWQHQRQgWRBRB@G0dAte3kg@MBWQQQHRgWQRBHgWgHBWRQWBb+_lggRgRggQg https://asciify.me YTt\n" +
                 "_:,_:^^:_^!:!,,~:^^PQHgHWHHgWHHBgoYWQgQBQBWgBQRBWQHWBRBgHgBWWHWMdU8qSXMWOdRWQRHHRQQRBRHRHgBWBQRHH&*<cBBQgBBgHQHBRggI+<;;|||vvv[c1Y1yt";
 
-        response.setMsg(harosh);
-        response.setStatus(Status.OK);
+
+        response.msg(harosh).status(Status.OK);
         return response;
     }
 

@@ -1,6 +1,6 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import common.interaction.Response;
 import common.interaction.Status;
 
@@ -11,12 +11,13 @@ public class Head extends ACommands{
 
     public Response execute(RouteDAO routeDAO) {
         if (routeDAO.getAll().size() == 0) {
-            response.setMsg("пусто...");
-            response.setStatus(Status.COLLECTION_ERROR);
+
+            response.msg("пусто...").status(Status.COLLECTION_ERROR);
         } else {
-            response.setMsg(routeDAO.printFirst());
-            response.setStatus(Status.OK);
+
+            response.msg(routeDAO.printFirst()).status(Status.OK);
         }
+
         return response;
     }
 

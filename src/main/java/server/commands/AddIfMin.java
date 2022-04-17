@@ -1,7 +1,7 @@
 package server.commands;
 
 import common.console.Console;
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import common.interaction.Response;
 import common.interaction.Status;
 import common.utils.Route;
@@ -18,7 +18,7 @@ public class AddIfMin extends ACommands{
     public Response execute(RouteDAO routeDAO) {
         Optional<Route> minRoute = routeDAO.getAll().stream().min(Comparator.comparingInt(Route::getDistance));
 
-        Integer minDistance = minRoute.isPresent() ? minRoute.get().getDistance() : Integer.MAX_VALUE;
+        Integer minDistance = minRoute.map(Route::getDistance).orElse(Integer.MAX_VALUE);
         if (minDistance != 2) {
             try {
                 RouteInfo info = console.info();
@@ -29,18 +29,18 @@ public class AddIfMin extends ACommands{
                             info.distance);
                     routeDAO.create(route);
                 } else {
-                    response.setMsg("\"у нового элемента поле distance больше чем у минимального. вызовите команду заново с валидным полем distance\"");
-                    response.setStatus(Status.USER_EBLAN_ERROR);
+                    response.msg("у нового элемента поле distance больше чем у минимального. вызовите команду заново с валидным полем distance")
+                            .status(Status.USER_EBLAN_ERROR);
                 }
             } catch (RuntimeException e) {
-                response.setMsg("невозможно добавить элемент в коллекцию: " + e.getMessage());
-                response.setStatus(Status.COLLECTION_ERROR);
+                response.status(Status.COLLECTION_ERROR).msg("невозможно добавить элемент в коллекцию: " + e.getMessage());
             }
         }
-        else
-            response.setMsg("в коллекции уже лежит элемент с минимальным возможным значением поля distance");
-            response.setStatus(Status.COLLECTION_ERROR);
-            return response;
+        else{
+            response.msg("в коллекции уже лежит элемент с минимальным возможным значением поля distance").
+                    status(Status.COLLECTION_ERROR);
+        }
+        return response;
     }
 
 }

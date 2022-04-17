@@ -1,11 +1,8 @@
 package server;
 
 import common.console.ConsoleOutputer;
-import common.dao.RouteDAO;
-import common.exceptions.ClosedConnectionException;
-import common.exceptions.ConnectionException;
+import server.dao.RouteDAO;
 import common.exceptions.ExitException;
-import common.exceptions.InvalidReceivedException;
 import common.interaction.Request;
 import common.interaction.Response;
 import common.interaction.Status;
@@ -17,13 +14,10 @@ import server.file.FileManager;
 
 import java.io.*;
 import java.net.BindException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-
 import java.util.NoSuchElementException;
 
-import static ch.qos.logback.contrib.jackson.JacksonJsonFormatter.BUFFER_SIZE;
 
 public class ServerApp {
 

@@ -1,6 +1,6 @@
 package commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import org.junit.jupiter.api.Assertions;
 import common.utils.Route;
 import server.commands.RemoveFirst;

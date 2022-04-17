@@ -1,6 +1,6 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import common.interaction.Response;
 import common.interaction.Status;
 import common.utils.Route;
@@ -24,8 +24,8 @@ public class Clear extends ACommands{
             routeDAO.clear();
             distanceSet.clear();
 
-            response.setMsg("ура удалилось");
-            response.setStatus(Status.OK);
+            response.msg("ура удалилось")
+                    .status(Status.OK);
             return response;
     }
 }
