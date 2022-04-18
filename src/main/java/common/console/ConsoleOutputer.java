@@ -46,6 +46,10 @@ public class ConsoleOutputer implements MessageHandler {
         System.out.println(ANSI_WHITE + msg + ANSI_RESET);
     }
 
+    public void printNormal(String msg){
+        System.out.println(msg);
+    }
+
 }
 
 

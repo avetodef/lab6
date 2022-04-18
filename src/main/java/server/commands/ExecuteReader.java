@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExecuteReader {
+
     static public List<String> listOfNamesOfScripts = new ArrayList<>();
     static public boolean checkNameOfFileInList(String nameOfFile, String sendingArg){
         for (String name: listOfNamesOfScripts

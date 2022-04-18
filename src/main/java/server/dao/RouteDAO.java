@@ -78,7 +78,6 @@ public class RouteDAO implements DAO {
 
         return out.toString();
     }
-//TODO если получиться что убрать Optional<Route> из туСтринга и написать стримом
     public String printFirst() {
         return (collection.getFirst().toString());
     }
