@@ -16,6 +16,7 @@ public abstract class ACommands {
     }
     public abstract Response execute(RouteDAO routeDAO);
     protected boolean isAsker;
+    protected boolean isIdAsker;
     protected RouteInfo info;
 
     public void setInfo(RouteInfo info) {
@@ -30,6 +31,9 @@ public abstract class ACommands {
 
     public boolean isAsker() {
         return isAsker;
+    }
+    public boolean isIdAsker(){
+        return isIdAsker;
     }
 
     public Response response = new Response();
