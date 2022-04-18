@@ -15,6 +15,9 @@ public class Route {
     private common.utils.loc.Location to; //Поле может быть null
     private Integer distance; //Поле не может быть null, Значение поля должно быть больше 1
 
+    public static void builder() {
+    }
+
     public String getDescription() {
             return id + "," + name +","+ coordinates.getCoorX() + "," + coordinates.getCoorY() + "," + creationDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy : HH.mm.ss")) + "," + from.getFromX() + "," + from.getFromY() + ","
                     + from.getName() + "," + to.getToX() + "," + to.getToY() + "," + to.getName() + "," + distance;

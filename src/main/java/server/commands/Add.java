@@ -38,4 +38,9 @@ public class Add extends ACommands{
         //:(
         return response;
     }
+
+    @Override
+    public String toString() {
+        return "Add";
+    }
 }
