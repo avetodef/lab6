@@ -3,16 +3,15 @@ package client;
 import common.console.Console;
 import common.console.ConsoleOutputer;
 import common.console.ConsoleReader;
+import common.exceptions.CustomException;
 import common.exceptions.EmptyInputException;
 import common.exceptions.ExitException;
 import common.interaction.Request;
 import common.interaction.Response;
-import common.interaction.Status;
 import common.json.JsonConverter;
 import common.utils.RouteInfo;
 import server.commands.ACommands;
 import server.commands.CommandSaver;
-import server.commands.ExecuteReader;
 import server.dao.RouteDAO;
 import server.file.FileManager;
 
@@ -37,7 +36,6 @@ public class ClientApp {
     ByteBuffer buffer = ByteBuffer.allocate(40000);
     Console console = new Console();
     CommandChecker commandChecker = new CommandChecker();
-    //TODO обработать пицот миллионов поломок джокера по типу поменял порт, подключил два клиента, еще что-нибудь
     int serverPort = 6666;
 
     protected void mainClientLoop() {
@@ -51,7 +49,6 @@ public class ClientApp {
             Selector selector = Selector.open();
             SocketChannel socketChannel = SocketChannel.open();
             socketChannel.configureBlocking(false);
-            //TODO после первой команды перестает работать почему то...
 
             socketChannel.connect(new InetSocketAddress("localhost", serverPort));
             socketChannel.register(selector, SelectionKey.OP_CONNECT);
@@ -65,10 +62,9 @@ public class ClientApp {
                     SelectionKey key = iterator.next();
                     iterator.remove();
                     SocketChannel client = (SocketChannel) key.channel();
-                    //try
                     {
                         if (key.isConnectable()) {
-                            System.out.println("connect");
+
 
                             if (client.isConnectionPending()) {
                                 try {
@@ -83,22 +79,31 @@ public class ClientApp {
                         }
 
                         if (key.isWritable()) {
-                            System.out.println("write");
+
                             try {
 
                                 input = consoleReader.reader();
                                 request = new Request(input, null);
                                 ASCIIArt.ifExit(input, output);
-                                if(commandChecker.ifExecuteScript()) {
+
+                                if (input.contains("execute_script")) {
+                                    if (commandChecker.ifExecuteScript(input)) {
+                                        readAndSend(input, request, socketChannel);
+                                    } else break;
+                                } else {
                                     readAndSend(input, request, socketChannel);
                                 }
 
+                            } catch (NumberFormatException e) {
+                                System.out.println("int введи");
                             } catch (NullPointerException e) {
                                 output.printRed("Введённой вами команды не существует. Попробуйте ввести другую команду.");
                             } catch (EmptyInputException e) {
                                 output.printRed(e.getMessage());
+                                continue;
                             } catch (IndexOutOfBoundsException e) {
                                 output.printRed("брат забыл айди ввести походу");
+                                continue;
                             } catch (IOException e) {
                                 System.out.println("writable problems: " + e.getMessage());
                             }
@@ -107,7 +112,7 @@ public class ClientApp {
                         }
 
                         if (key.isReadable()) {
-                            System.out.println("read");
+
                             try {
                                 socketChannel.read(buffer);
                                 buffer.flip();
@@ -132,8 +137,7 @@ public class ClientApp {
 
             }
 
-        }
-        catch (UnknownHostException e) {
+        } catch (UnknownHostException e) {
             System.err.println("неизвестный хост. порешай там в коде что нибудь ок?");
             System.exit(1);
         } catch (IOException exception) {
@@ -155,20 +159,26 @@ public class ClientApp {
     }
 
     private void readAndSend(List<String> input, Request request, SocketChannel socketChannel) throws IOException {
-
+        boolean flag = true;
         if (CommandSaver.checkCommand(input)) {
 
             ACommands command = CommandSaver.getCommand(input);
-            if (command.isAsker()) {
-                RouteInfo info = console.info();
-                request.setInfo(info);
-            }
-            if (command.isIdAsker()){
-                if (input.size() != 2) throw new IndexOutOfBoundsException();
-            }
-            socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.ser(request)));
-            System.out.println("sending to the server...");
+            if (command.isIdAsker()) {
+                if (input.size() != 2 || Integer.parseInt(input.get(1)) < 0 || input.get(1).contains(".") || input.get(1).contains(",")) {
+                    System.err.println("введи нормальный айди");
+                    flag = false;
 
+                }
+            }
+            if (flag) {
+                if (command.isAsker()) {
+                    RouteInfo info = console.info();
+                    request.setInfo(info);
+                }
+
+                socketChannel.write(StandardCharsets.UTF_8.encode(JsonConverter.ser(request)));
+                System.out.println("sending to the server...");
+            } else throw new CustomException("ну значит не отправлю на сервер твою команду. заново вводи");
 
         } else
             throw new NullPointerException("Введённой вами команды не существует. Попробуйте ввести другую команду.");
@@ -201,10 +211,6 @@ public class ClientApp {
             case USER_EBLAN_ERROR -> output.printPurple(r.msg);
         }
     }
-
-    FileManager manager = new FileManager();
-    RouteDAO dao = manager.read();
-
 
 
 }

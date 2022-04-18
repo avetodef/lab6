@@ -14,7 +14,9 @@ public abstract class ACommands {
     public void addArgs(List<String> args) {
         this.args = args;
     }
+
     public abstract Response execute(RouteDAO routeDAO);
+
     protected boolean isAsker;
     protected boolean isIdAsker;
     protected RouteInfo info;
@@ -23,7 +25,7 @@ public abstract class ACommands {
         this.info = info;
     }
 
-    public static ACommands getCommand(Request request){
+    public static ACommands getCommand(Request request) {
         ACommands command = CommandSaver.getCommand(request.getArgs());
         command.setInfo(request.getInfo());
         return command;
@@ -32,7 +34,8 @@ public abstract class ACommands {
     public boolean isAsker() {
         return isAsker;
     }
-    public boolean isIdAsker(){
+
+    public boolean isIdAsker() {
         return isIdAsker;
     }
 
