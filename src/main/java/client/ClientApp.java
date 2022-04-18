@@ -7,10 +7,14 @@ import common.exceptions.EmptyInputException;
 import common.exceptions.ExitException;
 import common.interaction.Request;
 import common.interaction.Response;
+import common.interaction.Status;
 import common.json.JsonConverter;
 import common.utils.RouteInfo;
 import server.commands.ACommands;
 import server.commands.CommandSaver;
+import server.commands.ExecuteReader;
+import server.dao.RouteDAO;
+import server.file.FileManager;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -18,10 +22,10 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
+import java.util.*;
 
 
 public class ClientApp {
@@ -32,7 +36,7 @@ public class ClientApp {
     Scanner fromKeyboard = new Scanner(System.in);
     ByteBuffer buffer = ByteBuffer.allocate(40000);
     Console console = new Console();
-
+    CommandChecker commandChecker = new CommandChecker();
     //TODO обработать пицот миллионов поломок джокера по типу поменял порт, подключил два клиента, еще что-нибудь
     int serverPort = 6666;
 
@@ -85,9 +89,9 @@ public class ClientApp {
                                 input = consoleReader.reader();
                                 request = new Request(input, null);
                                 ASCIIArt.ifExit(input, output);
-
-                                readAndSend(input, request, socketChannel);
-
+                                if(commandChecker.ifExecuteScript()) {
+                                    readAndSend(input, request, socketChannel);
+                                }
 
                             } catch (NullPointerException e) {
                                 output.printRed("Введённой вами команды не существует. Попробуйте ввести другую команду.");
@@ -117,6 +121,7 @@ public class ClientApp {
 
                             } catch (RuntimeException e) {
                                 System.out.println("readable problems: " + e.getMessage());
+                                e.printStackTrace();
                             }
                             client.register(selector, SelectionKey.OP_WRITE);
 
@@ -196,5 +201,10 @@ public class ClientApp {
             case USER_EBLAN_ERROR -> output.printPurple(r.msg);
         }
     }
+
+    FileManager manager = new FileManager();
+    RouteDAO dao = manager.read();
+
+
 
 }

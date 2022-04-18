@@ -24,11 +24,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
     implementation 'org.codehaus.janino:janino:3.0.8'
 
-    compileOnly 'org.projectlombok:lombok:1.18.16'
-    annotationProcessor 'org.projectlombok:lombok:1.18.16'
 
-    testCompileOnly 'org.projectlombok:lombok:1.18.16'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
 }
 
 test {

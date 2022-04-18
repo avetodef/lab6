@@ -1,11 +1,12 @@
-package server.commands;
-
+package client;
 
 import common.exceptions.EmptyInputException;
 import common.interaction.Response;
 import common.interaction.Status;
+import server.commands.ACommands;
+import server.commands.CommandSaver;
+import server.commands.ExecuteReader;
 import server.dao.RouteDAO;
-import server.file.FileManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,15 +16,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Класс команды EXECUTE SCRIPT, предназначенный для чтения и исполнения скрипта из файла
- */
-
-public class ExecuteScript extends ACommands {
-    FileManager manager = new FileManager();
-    RouteDAO dao = manager.read();
-
-    public Response execute(RouteDAO routeDAO) {
+public class CommandChecker extends ACommands{
+//TODO как я это вижу. у тебя тут практически то же самое что и в самом классе скрипта, но только у тебя булеан и если что-то не так то просто
+    //выводится сообщение что файла нет итд.
+    // а вот если у тебя в скрипте написано нормально что-то то тогда возвращается правда и собственно клиент может отсылать команду на сервер
+    public boolean ifExecuteScript( ) {
 
         String nameOfScript = args.get(1); //ok
 
@@ -36,7 +33,7 @@ public class ExecuteScript extends ACommands {
 
                 for (String lineOfFile : listOfCommands
                 ) {
-                    ACommands commands;
+
                     String command = lineOfFile.trim();
                     System.out.println("command");
                     if (command.isEmpty()) {
@@ -45,26 +42,29 @@ public class ExecuteScript extends ACommands {
                     List<String> args = new ArrayList<>(Arrays.asList(command.split(" ")));
 
                     try {
-                        commands = CommandSaver.getCommand(args);
-                        commands.execute(dao);
-                        System.out.println(commands.execute(dao).toString());
-                        response = commands.response;
+
+                        if (CommandSaver.checkCommand(args))
+                            return true;
                     } catch (RuntimeException e) {
-                        response.msg("ты норм? в скрипте параша написана, переделывай").
-                                status(Status.USER_EBLAN_ERROR);
+                        System.out.println("в скрипте параша написана, переделывай" //TODO по аналогии с этим сделай когда ловятся остальные исключения или рекурсия
+                        );
+                        return false;
                     }
                 }
             } catch (NoSuchFileException e) {
-                response.msg("файл не найден").status(Status.FILE_ERROR);
+
             } catch (IOException e) {
-                response.msg("Все пошло по пизде, чекай мать: " + e.getMessage()).
-                        status(Status.UNKNOWN_ERROR);
 
             }
             ExecuteReader.listOfNamesOfScripts.clear();
         } else {
             response.msg("пу пу пу.... обнаружена рекурсия").status(Status.USER_EBLAN_ERROR);
         }
-        return response;
+
+    }
+
+    @Override
+    public Response execute(RouteDAO routeDAO) {
+        return null;
     }
 }

@@ -1,6 +1,7 @@
 package server;
 
 import common.console.ConsoleOutputer;
+import server.commands.ExecuteScript;
 import server.dao.RouteDAO;
 import common.exceptions.ExitException;
 import common.interaction.Request;
@@ -113,6 +114,15 @@ public class ServerApp {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+
+    private void IfExecuteScript(ACommands command){
+        if (command.getClass() == ExecuteScript.class){
+
+
+
         }
     }
 
