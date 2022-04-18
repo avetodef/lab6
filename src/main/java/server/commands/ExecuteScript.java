@@ -1,7 +1,10 @@
 package server.commands;
 
+import client.ExecuteScriptStart;
 import common.interaction.Response;
 import server.dao.RouteDAO;
+
+import java.util.List;
 
 /**
  * Класс команды EXECUTE SCRIPT, предназначенный для чтения и исполнения скрипта из файла
@@ -19,10 +22,13 @@ public class ExecuteScript extends ACommands{
         return "ExecuteScript";
     }
 
+    ExecuteScriptStart esc = new ExecuteScriptStart();
 
     @Override
     public Response execute(RouteDAO routeDAO){
-        RouteDAO.executeScript(routeDAO[0]);
+        //RouteDAO.executeScript(routeDAO[0]);
+        return esc.executeStart();
+
     }
 }
 
