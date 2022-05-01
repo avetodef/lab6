@@ -1,6 +1,8 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 
 /**
  * Класс команды RZHAKA, предназначенный для мемного троллинга
@@ -34,7 +36,7 @@ public class Rzhaka extends ACommands{
 //        }
 //return "vefwerfgw";
 //    }
-    public String execute(RouteDAO routeDAO){
+    public Response execute(RouteDAO routeDAO){
         String harosh = "11T1YYY1TYTT11Y11YT1TTYTzftztstsyyy23#5Z5XZZ5XZ$Xkw9wSk$kZ5XE9hhSEk5$kZ5kk$k5ZZ$XXZEhw%AhEwEZXZ5Zk5Z5$ZZPA6E6SE0dmUKGm0MMOMOOOMMDDD&&\n" +
                 "TY1TLc[[LlLLlcYY1Y}{]l1T1Y11TTYT11fynF#3a#IV###eaZZZAPZ9qM&HWBW@DDOMq%Z$44#33a$ZX$5kZX$k$Z$X5Z$#4I##ZZ5kkk$ZZ6EPAKbmb0q0pmdq0bOOMOMMM\n" +
                 "x]l}{L7[lx]lL7c{}L{7}x]7[c}Lll]Y1YYfyCCJ22u2CuCI4IekO@gQWgQWQH@@DDMMMM8qAZaeI333#V3#e#3VV#44aIa#eV#IaV3#V5$X5X5ASAAwhSh%%9AA%KqGdGGbM\n" +
@@ -84,7 +86,10 @@ public class Rzhaka extends ACommands{
                 "_:^,,^_!_:::~:^^_!-?BHQWQHBRRQBQHB$cBRHBHgHHHgRRgHQWHBBBRRRBWHNdZhTCGMQW@@gHQWRHQWBBHBQgHBQWgHQQQ3 '_]NQWBHQHHQRggWZ:>=*\"=(/\\iivixL[1\n" +
                 "!,!!,!^~,^,~^_!~,^,yBWRQQQBQHHQWHD(ERQQBRRBgBRRQHQWQHQRQgWRBRB@G0dAte3kg@MBWQQQHRgWQRBHgWgHBWRQWBb+_lggRgRggQg https://asciify.me YTt\n" +
                 "_:,_:^^:_^!:!,,~:^^PQHgHWHHgWHHBgoYWQgQBQBWgBQRBWQHWBRBgHgBWWHWMdU8qSXMWOdRWQRHHRQQRBRHRHgBWBQRHH&*<cBBQgBBgHQHBRggI+<;;|||vvv[c1Y1yt";
-        return harosh;
+
+
+        response.msg(harosh).status(Status.OK);
+        return response;
     }
 
 }

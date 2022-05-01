@@ -1,4 +1,4 @@
-package common.dao;
+package server.dao;
 
 import common.utils.Route;
 import common.utils.RouteInfo;

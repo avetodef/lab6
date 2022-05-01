@@ -1,6 +1,6 @@
-package common.file;
+package server.file;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 import common.utils.Route;
 import common.utils.RouteInfo;
 
@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class CSVFileReader {
     private static String nameOfFile = System.getenv().get("collection.csv");
-    private static final String TEMP_FILE = "C:/collection_temp.csv";
+    private static final String TEMP_FILE = "C:\\collection.csv";
     public RouteDAO read() {
         File file = new File(nameOfFile);
         String input = " ";

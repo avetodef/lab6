@@ -156,6 +156,7 @@ public class Console implements RouteInformation {
                 System.out.println("неправильный тип данных");
             }
         }
+
         return out;
     }
 

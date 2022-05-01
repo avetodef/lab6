@@ -1,6 +1,8 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 import common.utils.Route;
 
 import java.util.HashSet;
@@ -12,7 +14,7 @@ import java.util.Set;
 public class Clear extends ACommands{
     static Set<Integer> distanceSet = new HashSet<>();
 
-    public String execute(RouteDAO routeDAO) {
+    public Response execute(RouteDAO routeDAO) {
 
             for (Route route : routeDAO.getAll()) {
                 distanceSet.add(route.getDistance());
@@ -21,6 +23,9 @@ public class Clear extends ACommands{
                 routeDAO.delete(i);
             routeDAO.clear();
             distanceSet.clear();
-            return ("коллекция очищена");
+
+            response.msg("ура удалилось")
+                    .status(Status.OK);
+            return response;
     }
 }

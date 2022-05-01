@@ -1,7 +1,8 @@
 package server.commands;
 
-import common.dao.RouteDAO;
-import common.utils.Route;
+import server.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,14 +14,18 @@ public class PrintUniqueDistance extends ACommands{
 
     static Set<Integer> distanceSet = new HashSet<>();
 
-    public String execute(RouteDAO routeDAO) {
-        if (routeDAO.getAll().size() == 0) {
-            return ("коллекция пустая. нечего выводить");
-        } else {
+    public Response execute(RouteDAO routeDAO) {
+        if (routeDAO.getAll().size() == 0)
+            response.msg("пусто").status(Status.COLLECTION_ERROR);
+         else {
             routeDAO.getAll().stream().forEach(r -> distanceSet.add(r.getDistance()));
-            //System.out.println("уникальные значения поля distance: " + distanceSet.toString());
-            return "уникальные значения поля distance: " + distanceSet.toString();
+
+            response.msg("уникальные значения поля distance: " + distanceSet.toString()).
+                    status(Status.OK);
+
         }
+
+        return response;
     }
 
 }

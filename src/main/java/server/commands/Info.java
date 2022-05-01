@@ -1,6 +1,8 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 
 
 /**
@@ -8,9 +10,10 @@ import common.dao.RouteDAO;
  */
 public class Info extends ACommands {
 
-    public String execute(RouteDAO routeDAO) {
+    public Response execute(RouteDAO routeDAO) {
 
-            return (routeDAO.toString());
+        response.msg(routeDAO.toString()).status(Status.OK);
 
+        return response;
     }
 }

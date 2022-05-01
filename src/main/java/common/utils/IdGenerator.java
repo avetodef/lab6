@@ -1,6 +1,6 @@
 package common.utils;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
 
 public class IdGenerator {
     private static int id;

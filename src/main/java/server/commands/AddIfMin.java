@@ -1,7 +1,9 @@
 package server.commands;
 
 import common.console.Console;
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 import common.utils.Route;
 import common.utils.RouteInfo;
 
@@ -11,13 +13,12 @@ import java.util.*;
  * Класс команды ADD IF MIN, предназначенный для добавления элементов в коллекцию, если он является наименьшим
  */
 public class AddIfMin extends ACommands{
-
     Console console = new Console();
 
-    public String execute(RouteDAO routeDAO) {
+    public Response execute(RouteDAO routeDAO) {
         Optional<Route> minRoute = routeDAO.getAll().stream().min(Comparator.comparingInt(Route::getDistance));
 
-        Integer minDistance = minRoute.isPresent() ? minRoute.get().getDistance() : Integer.MAX_VALUE;
+        Integer minDistance = minRoute.map(Route::getDistance).orElse(Integer.MAX_VALUE);
         if (minDistance != 2) {
             try {
                 RouteInfo info = console.info();
@@ -28,15 +29,18 @@ public class AddIfMin extends ACommands{
                             info.distance);
                     routeDAO.create(route);
                 } else {
-
-                    return ("у нового элемента поле distance больше чем у минимального. вызовите команду заново с валидным полем distance");
+                    response.msg("у нового элемента поле distance больше чем у минимального. вызовите команду заново с валидным полем distance")
+                            .status(Status.USER_EBLAN_ERROR);
                 }
             } catch (RuntimeException e) {
-                return ("невозможно добавить элемент в коллекцию: " + e.getMessage());
+                response.status(Status.COLLECTION_ERROR).msg("невозможно добавить элемент в коллекцию: " + e.getMessage());
             }
         }
-        else return ("в коллекции уже лежит элемент с минимальным возможным значением поля distance");
-        return "а что тут писать я не знаю";
+        else{
+            response.msg("в коллекции уже лежит элемент с минимальным возможным значением поля distance").
+                    status(Status.COLLECTION_ERROR);
+        }
+        return response;
     }
 
 }

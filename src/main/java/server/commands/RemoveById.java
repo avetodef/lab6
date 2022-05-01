@@ -1,6 +1,8 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 
 /**
  * Класс команды REMOVE BY ID, предназначенный для удаления элемента по его id
@@ -8,28 +10,37 @@ import common.dao.RouteDAO;
  * @param
  */
 public class RemoveById extends ACommands {
-
-    public String execute(RouteDAO routeDAO) {
+    {
+        isIdAsker = true;
+    }
+    public Response execute(RouteDAO routeDAO) {
         if (routeDAO.getAll().size() == 0) {
-            return ("коллекция пустая. нечего удалять");
+            response.setMsg("коллекция пустая. нечего удалять");
+            response.setStatus(Status.COLLECTION_ERROR);
         } else {
             try {
-                //TODO переделать часть где берут аргументы :)))))))) то же самле с апдейт бай айди
-                int id = Integer.parseInt(args.get(0));
-                if (!routeDAO.removeById(id)) {
-                    return ("нет элемента с таким id. введите команду заново с правильным id");
-                } else {
-                    return ("элемент успешно удален");
+                int id = Integer.parseInt(args.get(1));
+                if (!routeDAO.delete(id))
+                    response.msg("нет элемента с таким id. введите команду заново с правильным id" ).
+                            status(Status.USER_EBLAN_ERROR);
+                 else
+                     response.msg("ура удалилось").status(Status.OK);
 
-                }
             }
             catch (IndexOutOfBoundsException e){
-                return ("брат забыл айди ввести походу");
+                response.status(Status.USER_EBLAN_ERROR).msg("брат забыл айди ввести походу ");
+            }
+            catch (NumberFormatException e){
+                response.msg("леее почему не int ввел братан").status(Status.USER_EBLAN_ERROR);
+
             }
             catch (RuntimeException e) {
-                return ("непредвиденная ошибка в классе команды: " + e.getMessage());
+                response.msg("непредвиденная ошибка в классе команды: " + e.getMessage())
+                        .status(Status.UNKNOWN_ERROR);
             }
 
         }
+        return response;
     }
+
 }

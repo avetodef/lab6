@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ConsoleReader {
+
     public List<String> reader(){
         Scanner sc = new Scanner(System.in);
         String command = sc.nextLine().trim();

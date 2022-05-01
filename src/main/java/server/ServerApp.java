@@ -1,13 +1,15 @@
 package server;
 
 import common.console.ConsoleOutputer;
-import common.dao.RouteDAO;
-import common.exceptions.EmptyInputException;
+import server.commands.ExecuteScript;
+import server.dao.RouteDAO;
 import common.exceptions.ExitException;
+import common.interaction.Request;
+import common.interaction.Response;
+import common.interaction.Status;
 import common.json.JsonConverter;
 import common.utils.IdGenerator;
 import server.commands.ACommands;
-import server.commands.CommandSaver;
 import server.commands.Save;
 import server.file.FileManager;
 
@@ -15,89 +17,113 @@ import java.io.*;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.Scanner;
+
 
 public class ServerApp {
-
+    Scanner fromKeyboard = new Scanner(System.in);
     FileManager manager = new FileManager();
     RouteDAO dao = manager.read();
-    ConsoleOutputer outputer = new ConsoleOutputer();
+    ConsoleOutputer output = new ConsoleOutputer();
 
     protected void mainServerLoop() throws IOException {
 
         IdGenerator.reloadId(dao);
         ACommands command;
-        ServerResponse serverResponse = new ServerResponse("я русский");
+        Response serverResponse;
+        Response errorResponse = new Response();
+        errorResponse.setStatus(Status.SERVER_ERROR);
+
         try {
+
             int port = 6666;
-            outputer.printPurple("Ожидаю подключение клиента");
-            ServerSocket ss = new ServerSocket(port);
+            output.printPurple("Ожидаю подключение клиента");
+            ServerSocket serverSocket = new ServerSocket(port, 1);
 
-            // TODO сделать чтобы сервер ждал пока клиент не подключится даже если клиент упадет
-            Socket socket = ss.accept();
-            outputer.printPurple("Клиент подключился");
-            // Берем входной и выходной потоки сокета, теперь можем получать и отсылать данные клиенту.
-            InputStream socketInputStream = socket.getInputStream();
-            OutputStream socketOutputStream = socket.getOutputStream();
-
-            // Конвертируем потоки в другой тип, чтоб легче обрабатывать текстовые сообщения.
-            DataInputStream in = new DataInputStream(socketInputStream);
-            DataOutputStream out = new DataOutputStream(socketOutputStream);
             while (true) {
+
                 try {
 
-                    String commandFromClient;
-                    StringBuilder builder = new StringBuilder();
-                    int byteRead;
-                    while((byteRead = socketInputStream.read())!=-1) {
-                        if(byteRead == 0)
-                            break;
-                        builder.append((char) byteRead);
+                    Socket socket = serverSocket.accept();
+                    InputStream socketInputStream = socket.getInputStream();
+                    OutputStream socketOutputStream = socket.getOutputStream();
+
+                    DataOutputStream dataOutputStream = new DataOutputStream(socketOutputStream);
+
+                    output.printPurple("Клиент подключился");
+
+
+                    while (true) {
+
+                        try {
+                            output.printWhite("готов принимать запросы от клиента");
+                            String requestJson;
+                            StringBuilder builder = new StringBuilder();
+                            int byteRead;
+                            while ((byteRead = socketInputStream.read()) != -1) { //тут падает
+                                if (byteRead == 0) break;
+                                builder.append((char) byteRead);
+                            }
+                            requestJson = builder.toString();
+
+                            Request request = JsonConverter.des(requestJson);
+
+                            command = ACommands.getCommand(request);
+
+                            serverResponse = command.execute(dao);
+                            dataOutputStream.writeUTF(JsonConverter.serResponse(serverResponse));
+
+                            Save.execute(dao);
+
+                        } catch (NullPointerException e) {
+                            errorResponse.setMsg("Введённой вами команды не существует. Попробуйте ввести другую команду." + e.getLocalizedMessage()
+                                    + e.getCause());
+                            dataOutputStream.writeUTF(JsonConverter.serResponse(errorResponse));
+
+                        } catch (NoSuchElementException e) {
+                            throw new ExitException("пока............");
+
+                        } catch (BindException e) {
+                            e.printStackTrace();
+
+                        } catch (UTFDataFormatException e) {
+                            errorResponse.setMsg("зачем прогу ломаешь, зачем добавляешь 500+ элементов ");
+                            dataOutputStream.writeUTF(JsonConverter.serResponse(errorResponse));
+                        }
                     }
-                    System.out.println("end");
-                    System.out.println(builder);
+                } catch (SocketException e) {
+                    System.err.println("клиент упал. подожди немного. закончить работу клиента? yes или no?");
 
-                    commandFromClient = in.readUTF(); //todo застревает на этой строке. почему.
-                    //как будто он нихуя не прочитал
-
-                    System.out.println(commandFromClient);
-                    //out.writeUTF(serverResponse.gotACommand(commandFromClient));
-                    command = CommandSaver.getCommand((Objects.requireNonNull(JsonConverter.deserialize(commandFromClient))));
-                    System.out.println("леня жирный уебан");
-                    //command.execute(dao);
-
-                    out.writeUTF(serverResponse.commandResponse(command, dao));
-                    Save.execute(dao);
-                    System.out.println("dnwqnfhwpo");
-
-                } catch (NullPointerException e) {
-                    System.out.println("Введённой вами команды не существует. Попробуйте ввести другую команду." + e.getLocalizedMessage()
-                            + e.getCause());
-                } catch (NoSuchElementException e) {
-                    throw new ExitException("пока............");
-                } catch (EmptyInputException e) {
-                    outputer.printRed("ошибка на сервере: " + e.getLocalizedMessage());
-                } catch (IndexOutOfBoundsException e) {
-                    outputer.printRed("брат забыл айди ввести походу");
-                } catch (BindException e) {
-                    System.out.println(e.getLocalizedMessage());
-                }
-                //TODO выкидывает бесконечный поток исключений если соединение преравно :)))
-                catch (IOException exception) {
-                    System.err.println("Клиент пока недоступен...такое случается.");
-                    //жди......
-
+                    String answer;
+                    while (!(answer = fromKeyboard.nextLine()).equals("no")) {
+                        switch (answer) {
+                            case "":
+                                break;
+                            case "yes":
+                                System.exit(0);
+                                break;
+                            default:
+                                System.out.println("скажи пожалуйста.... yes или no");
+                        }
+                    }
+                    System.err.println("ну подожди еще значит");
                 }
 
             }
-        } catch (IllegalArgumentException e) {
-            System.err.println("номера портов клиента и сервера не совпадают: " + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-    //TODO этот чекер не работает...... вместе с ним ломается и клиент и сервер и вообще все падает
-    private boolean checkConnection(Socket socket){
-        //TODO надо как-то написать проверятель есть ли подсоединение или нет....
-        //па ра ша
+
+
+    private void IfExecuteScript(ACommands command){
+        if (command.getClass() == ExecuteScript.class){
+
+
+
+        }
     }
+
 }

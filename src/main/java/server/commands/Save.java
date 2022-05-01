@@ -1,6 +1,8 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 import server.file.FileManager;
 
 import java.io.IOException;
@@ -10,13 +12,18 @@ import java.io.IOException;
  */
 public class Save {
 
-    public static String execute(RouteDAO routeDAO) {
+    public static Response execute(RouteDAO routeDAO) {
+        Response response = new Response();
         FileManager writer = new FileManager();
             try {
                 writer.save(routeDAO);
-                return "ура сохранилось";
+                response.status(Status.OK).msg("ура сохранилось");
+
             } catch (RuntimeException | IOException e) {
-                return ("не удалось сохранить коллекцию " + e.getMessage() );
+                response.msg("не удалось сохранить коллекцию " + e.getMessage())
+                        .status(Status.COLLECTION_ERROR);
             }
+
+            return response;
         }
     }

@@ -1,6 +1,8 @@
 package server.commands;
 
-import common.dao.RouteDAO;
+import server.dao.RouteDAO;
+import common.interaction.Response;
+import common.interaction.Status;
 
 /**
  * Класс команды SHOW, предназначенный для вывода коллекции на консоль
@@ -8,12 +10,14 @@ import common.dao.RouteDAO;
 public class Show extends ACommands {
 
     @Override
-    public String execute(RouteDAO routeDAO) {
+    public Response execute(RouteDAO routeDAO) {
         if (routeDAO.getAll().size() == 0) {
-            return ("коллекция пустая");
+            response.msg("пусто").status(Status.COLLECTION_ERROR);
+
         }
         else
-            return (routeDAO.getCollection());
+        response.status(Status.OK).msg(routeDAO.getCollection());
 
+        return response;
     }
 }
