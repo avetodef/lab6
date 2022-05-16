@@ -1,8 +1,10 @@
-import server.dao.RouteDAO;
 import common.utils.Route;
 import common.utils.RouteInfo;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import server.dao.RouteDAO;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayDeque;
@@ -10,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RouteDAOTest {
 
@@ -18,12 +20,12 @@ class RouteDAOTest {
 
     RouteDAO dao = new RouteDAO(collection);
 
-    Route firstElement = new Route("first", 1, 1.0, 1, (long) 1.0, "1", 1, 1, "1", 2);
-    Route secondElement = new Route("second", 2, 2.0, 2, (long) 2.0, "2", 2, 2, "2", 2);
+    Route firstElement = new Route(1, "first", 1, 1.0, 1, (long) 1.0, "1", 1, 1, "1", 2);
+    Route secondElement = new Route(2, "second", 2, 2.0, 2, (long) 2.0, "2", 2, 2, "2", 2);
 
     //тестируем метод add
     @Test
-    void collectionSizeShouldBeUpByOne(){
+    void collectionSizeShouldBeUpByOne() {
         int sizeBefore = collection.size();
         dao.create(firstElement);
         int sizeAfter = collection.size();
@@ -31,19 +33,10 @@ class RouteDAOTest {
 
         Assertions.assertEquals(assertedSize, sizeAfter);
     }
-    //тестируем метод clear
-    @Test
-    void collectionShouldBeClear(){
-        collection.add(firstElement);
-        collection.add(secondElement);
 
-        dao.clear();
-
-        Assertions.assertEquals(0, collection.size());
-    }
     //removeFirst
     @Test
-    void shouldBeNoFirstElement(){
+    void shouldBeNoFirstElement() {
         collection.add(firstElement);
         collection.add(secondElement);
 
@@ -51,6 +44,7 @@ class RouteDAOTest {
 
         Assertions.assertNull(dao.get(1));
     }
+
     //тестируем метод delete(int id)
     @Test
     void shouldBeNoElementWithId2() {
@@ -66,16 +60,31 @@ class RouteDAOTest {
         assertNull(routeWithId2);
 
     }
+
     //тестируем метод update(int id)
 
     @Test
-    public void elementShouldBeUpdated(){
+//    //TODO переделать этот тестик + еще как минимум 4 штуки добавить
+    public void elementShouldBeUpdated() {
         collection.add(firstElement);
         collection.add(secondElement);
-        ZonedDateTime zdt = ZonedDateTime.now();
 
-        RouteInfo newRoute = new RouteInfo(2,"new", 12.0, 12.0, zdt, 12.0, (long) 12.0,"from", 12, 12, "to", 2 );
-        Route assertedRoute = new Route("new", 12.0, 12.0, 12.0, (long) 12.0,"from", 12, 12, "to", 2);
+        ArrayList<String> data = new ArrayList<>();
+        data.add("2");
+        data.add("new");
+        data.add("12.0");
+        data.add("12.0");
+        data.add(ZonedDateTime.now().toString());
+        data.add("12");
+        data.add("12");
+        data.add("from");
+        data.add("12");
+        data.add("12");
+        data.add("to");
+        data.add("2");
+        RouteInfo newRoute = new RouteInfo(data);
+        Route assertedRoute = new Route(2, "new", 12.0, 12.0, 12.0, (long) 12.0, "from", 12, 12, "to", 2);
+
         dao.update(2, newRoute);
 
         Assertions.assertEquals(secondElement.getName(), assertedRoute.getName());
@@ -93,15 +102,17 @@ class RouteDAOTest {
 
         Assertions.assertEquals(secondElement.getDistance(), assertedRoute.getDistance());
     }
+
     //тестируем getMaxID
     @Test
-    public void maxIdShouldBe2(){
+    @DisplayName("Проверка метода получения максимального id элемента")
+    public void maxIdShouldBe2() {
 
         collection.add(firstElement);
         collection.add(secondElement);
         List<Integer> ids = new ArrayList<>();
 
-        for (Route route : collection){
+        for (Route route : collection) {
             ids.add(route.getId());
         }
         int maxId = -1;
@@ -113,4 +124,34 @@ class RouteDAOTest {
         Assertions.assertEquals(maxId, dao.getMaxId());
 
     }
+
+
+    private RouteDAO routeDAO;
+
+    @BeforeEach
+    public void setup() {
+        System.out.println("Instantiating RouteDAO");
+        routeDAO = new RouteDAO();
+    }
+
+    @Test
+    @DisplayName("Проверка метода добавления нового элемента в коллекцию")
+    void add() {
+        //Route route = new Route(1, "name", 2, 4.0, 5.0, (long) 6.99, "name_from", 5, 5, "name_to", 7, null);
+        //routeDAO.create(route);
+        collection.add(firstElement);
+        assertFalse(dao.getCollection().isEmpty());
+        assertEquals(1, dao.getAll().size());
+    }
+
+    /*@Test
+    @DisplayName("Проверка метода очистки коллекции")
+    void clear() {
+        Route route1 = new Route(1,"name",2, 2.0,2,(long) 2.0,"name_from",2,2,"name_to",2,null);
+        Route route2 = new Route(1,"name",2, 2.0,2,(long) 2.0,"name_from",2,2,"name_to",2,null);
+    routeDAO.create(route1);
+    routeDAO.create(route2);
+    routeDAO.
+    }
+}*/
 }

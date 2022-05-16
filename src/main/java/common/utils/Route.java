@@ -26,7 +26,7 @@ public class Route {
                     + from.getName() + "," + to.getToX() + "," + to.getToY() + "," + to.getName() + "," + distance;
     }
 
-    public Route(String name, double coordinatesX, Double coordinatesY, double fromX, Long fromY, String nameFrom, int toX, float toY, String nameTo, Integer distance ){
+    public Route(int i, String name, double coordinatesX, Double coordinatesY, double fromX, Long fromY, String nameFrom, int toX, float toY, String nameTo, Integer distance){
         this.id = IdGenerator.nextId();
         this.name = name;
         this.coordinates = new Coordinates(coordinatesX, coordinatesY);

@@ -20,7 +20,7 @@ public class Add extends ACommands{
     }
     public Response execute(RouteDAO routeDAO) {
         try {
-            Route route = new Route(info.name, info.x, info.y, info.fromX,
+            Route route = new Route(1, info.name, info.x, info.y, info.fromX,
                     info.fromY, info.nameFrom, info.toX, info.toY, info.nameTo,
                     info.distance);
             routeDAO.create(route);
